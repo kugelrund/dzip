@@ -1,7 +1,9 @@
-# Makefile for Solaris
+# Makefile for linux
 
-CC = gcc
-CFLAGS = -Wall -O3 -DBIG_ENDIAN
+# Code does not work on 64-bit architectures at the moment. For example it
+# implicitly assumes that sizeof(long) == 4. So only 32-bit compilation works
+# for now. That's why we pass -m32.
+CFLAGS = -m32 -Wall -O3
 TARGET = dzip
 OBJECTS = main.o compress.o uncompress.o list.o crc32.o \
 	  encode.o decode.o v1code.o conmain.o delete.o \
