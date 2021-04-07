@@ -82,14 +82,7 @@ uInt dzFile_Size(void)
 /* change file pointer of dz */
 void dzFile_Seek (uInt dest)
 {
-#ifdef _MSC_VER
-	/* do this so 2-4GB files will work for windows version */
-	int hi = 0;
-	fseek(dzfile, 0, SEEK_CUR); /* can't just seek out from under crt's nose */
-	SetFilePointer(_get_osfhandle(fileno(dzfile)), dest, &hi, FILE_BEGIN);
-#else
 	fseek(dzfile, dest, SEEK_SET);
-#endif
 }
 
 /* chop off end of dz; this is implementation dependent
