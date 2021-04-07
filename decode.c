@@ -561,7 +561,7 @@ void (* const demx_message[])(void) = {
 	demx_string, demx_string, demx_showlmp	/* nehahra */
 };
 
-long cam0, cam1, cam2;
+unsigned long cam0, cam1, cam2;
 
 void dem_uncompress_init (int type)
 {

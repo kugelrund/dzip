@@ -631,7 +631,7 @@ void dem_compress (uInt start, uInt stop)
 	int cfields, clen;
 	char cdstring[12];
 	uchar *ptr;
-	long a1,a2,a3,o1,o2,o3;
+	unsigned long a1,a2,a3,o1,o2,o3;
 
 	#define bail(s) { fprintf(stderr,"\nwarning: %s\n",s); goto bailout; }
 

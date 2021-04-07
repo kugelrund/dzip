@@ -4,7 +4,7 @@ unsigned long crcval;
 unsigned long crc_reflect(unsigned long x, int bits)
 {
 	int i;
-	unsigned long v = 0, b = 1 << (bits - 1);
+	unsigned long v = 0, b = 1UL << (bits - 1);
 
 	for (i = 0; i < bits; i++)
 	{

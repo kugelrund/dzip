@@ -130,7 +130,7 @@ extern uInt totalsize;
 SFXVAR int entlink[MAX_ENT];
 SFXVAR long dem_gametime;
 SFXVAR long outlen;
-SFXVAR long cam0, cam1, cam2;
+SFXVAR unsigned long cam0, cam1, cam2;
 SFXVAR uchar *inblk, *outblk, *inptr;
 extern uchar *tmpblk;
 SFXVAR cdata_t oldcd, newcd;
