@@ -150,7 +150,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "zlib"=..\zlib\zlib.dsp - Package Owner=<4>
+Project: "zlib"=..\external\zlib.dsp - Package Owner=<4>
 
 Package=<5>
 {{{

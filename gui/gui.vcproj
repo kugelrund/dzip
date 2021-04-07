@@ -705,7 +705,7 @@
 				>
 			</File>
 			<File
-				RelativePath="..\zlib\zlib.h"
+				RelativePath="..\external\zlib\zlib.h"
 				>
 			</File>
 		</Filter>

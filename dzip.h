@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "zlib/zlib.h"
+#include "external/zlib/zlib.h"
 
 typedef unsigned char uchar;
 

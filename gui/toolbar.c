@@ -1,5 +1,5 @@
 #include <windows.h>
-#include "..\zlib\zlib.h"
+#include "..\external\zlib\zlib.h"
 #include "common.h"
 #include "menu.h"
 #include "options.h"

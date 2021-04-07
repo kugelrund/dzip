@@ -30,7 +30,7 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "installer", "installer\inst
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "selfexe", "selfexe\selfexe.vcproj", "{397ED61E-0204-4FB9-9810-307CD9D0874C}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "zlib", "..\zlib\zlib.vcproj", "{B2D320DF-9A2F-49BF-BF56-3C54BD9488F7}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "zlib", "..\external\zlib.vcproj", "{B2D320DF-9A2F-49BF-BF56-3C54BD9488F7}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

@@ -163,9 +163,18 @@ char *Dzip_strdup (const char *str)
 	return m;		
 }
 
-void *Dzip_calloc (uInt size)
+void *Dzip_calloc (void *opaque, uInt items, uInt size)
 {
-	return memset(Dzip_malloc(size), 0, size);
+	(void)opaque;
+	void *m = calloc(items, size);
+	if (!m) errorFatal("Out of memory!");
+	return m;
+}
+
+void Dzip_free (void *opaque, void *address)
+{
+	(void)opaque;
+	free(address);
 }
 
 #ifdef DZIP_BIG_ENDIAN
@@ -542,7 +551,7 @@ int main (int argc, char **argv)
 	tmpblk = outblk + p_blocksize / 2;
 	zbuf = tmpblk + p_blocksize / 2;
 	zs.zalloc = Dzip_calloc;
-	zs.zfree = free;
+	zs.zfree = Dzip_free;
 
 	if (flag[SW_VIEW])
 	{

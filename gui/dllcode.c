@@ -1,6 +1,6 @@
 #include <stdio.h>
 #include <windows.h>
-#include "..\zlib\zlib.h"
+#include "..\external\zlib\zlib.h"
 #include "gui_export.h"
 #include "gui_import.h"
 #include "common.h"
@@ -25,6 +25,20 @@ extern uInt crcval;
 
 gui_import_t gi;
 
+
+/* deflateInit and inflateInit are macros in newer zlib versions to allow
+   checking version. Therefore we cant use them directly in gui_export_t
+   but have to use wrappers instead. */
+int deflateInitWrapped(z_streamp strm, int level)
+{
+	return deflateInit(strm, level);
+}
+
+int inflateInitWrapped(z_streamp strm, int level)
+{
+	return deflateInit(strm, level);
+}
+
 const gui_export_t ge = {
 	&AbortOp,
 	&crcval,
@@ -48,10 +62,10 @@ const gui_export_t ge = {
 	YesNo,
 	deflate,
 	deflateEnd,
-	deflateInit,
+	deflateInitWrapped,
 	inflate,
 	inflateEnd,
-	inflateInit,
+	inflateInitWrapped,
 	make_crc
 };
 

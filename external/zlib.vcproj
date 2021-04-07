@@ -175,7 +175,7 @@
 			Filter="cpp;c;cxx;rc;def;r;odl;idl;hpj;bat"
 			>
 			<File
-				RelativePath="adler32.c"
+				RelativePath="zlib\adler32.c"
 				>
 				<FileConfiguration
 					Name="Debug|Win32"
@@ -195,7 +195,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="deflate.c"
+				RelativePath="zlib\crc32.c"
 				>
 				<FileConfiguration
 					Name="Debug|Win32"
@@ -215,7 +215,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="infblock.c"
+				RelativePath="zlib\deflate.c"
 				>
 				<FileConfiguration
 					Name="Debug|Win32"
@@ -235,7 +235,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="infcodes.c"
+				RelativePath="zlib\inffast.c"
 				>
 				<FileConfiguration
 					Name="Debug|Win32"
@@ -255,7 +255,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="inffast.c"
+				RelativePath="zlib\inflate.c"
 				>
 				<FileConfiguration
 					Name="Debug|Win32"
@@ -275,7 +275,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="inflate.c"
+				RelativePath="zlib\inftrees.c"
 				>
 				<FileConfiguration
 					Name="Debug|Win32"
@@ -295,7 +295,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="inftrees.c"
+				RelativePath="zlib\trees.c"
 				>
 				<FileConfiguration
 					Name="Debug|Win32"
@@ -315,27 +315,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="infutil.c"
-				>
-				<FileConfiguration
-					Name="Debug|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						PreprocessorDefinitions=""
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						PreprocessorDefinitions=""
-					/>
-				</FileConfiguration>
-			</File>
-			<File
-				RelativePath="trees.c"
+				RelativePath="zlib\zutil.c"
 				>
 				<FileConfiguration
 					Name="Debug|Win32"
@@ -360,43 +340,35 @@
 			Filter="h;hpp;hxx;hm;inl"
 			>
 			<File
-				RelativePath="deflate.h"
+				RelativePath="zlib\crc32.h"
 				>
 			</File>
 			<File
-				RelativePath="infblock.h"
+				RelativePath="zlib\deflate.h"
 				>
 			</File>
 			<File
-				RelativePath="infcodes.h"
+				RelativePath="zlib\inffast.h"
 				>
 			</File>
 			<File
-				RelativePath="inffast.h"
+				RelativePath="zlib\inftrees.h"
 				>
 			</File>
 			<File
-				RelativePath="inftrees.h"
+				RelativePath="zlib\trees.h"
 				>
 			</File>
 			<File
-				RelativePath="infutil.h"
+				RelativePath="zlib\zconf.h"
 				>
 			</File>
 			<File
-				RelativePath="trees.h"
+				RelativePath="zlib\zlib.h"
 				>
 			</File>
 			<File
-				RelativePath="zconf.h"
-				>
-			</File>
-			<File
-				RelativePath="zlib.h"
-				>
-			</File>
-			<File
-				RelativePath="zutil.h"
+				RelativePath="zlib\zutil.h"
 				>
 			</File>
 		</Filter>

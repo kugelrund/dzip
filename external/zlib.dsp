@@ -85,39 +85,35 @@ LIB32=link.exe -lib
 # PROP Default_Filter "cpp;c;cxx;rc;def;r;odl;idl;hpj;bat"
 # Begin Source File
 
-SOURCE=.\adler32.c
+SOURCE=.\zlib\adler32.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\deflate.c
+SOURCE=.\zlib\crc32.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\infblock.c
+SOURCE=.\zlib\deflate.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\infcodes.c
+SOURCE=.\zlib\inffast.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\inffast.c
+SOURCE=.\zlib\inflate.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\inflate.c
+SOURCE=.\zlib\inftrees.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\inftrees.c
+SOURCE=.\zlib\trees.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\infutil.c
-# End Source File
-# Begin Source File
-
-SOURCE=.\trees.c
+SOURCE=.\zlib\zutil.c
 # End Source File
 # End Group
 # Begin Group "Header Files"
@@ -125,43 +121,36 @@ SOURCE=.\trees.c
 # PROP Default_Filter "h;hpp;hxx;hm;inl"
 # Begin Source File
 
-SOURCE=.\deflate.h
+SOURCE=.\zlib\crc32.h
+# End Source File
+# Begin Source File
+# Begin Source File
+
+SOURCE=.\zlib\deflate.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\infblock.h
+SOURCE=.\zlib\inffast.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\infcodes.h
+SOURCE=.\zlib\inftrees.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\inffast.h
+SOURCE=.\zlib\trees.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\inftrees.h
+SOURCE=.\zlib\zconf.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\infutil.h
+SOURCE=.\zlib\zlib.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\trees.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\zconf.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\zlib.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\zutil.h
+SOURCE=.\zlib\zutil.h
 # End Source File
 # End Group
 # End Target

@@ -7,9 +7,9 @@ CFLAGS = -m32 -Wall -O3
 TARGET = dzip
 OBJECTS = main.o compress.o uncompress.o list.o crc32.o \
 	  encode.o decode.o v1code.o conmain.o delete.o \
-	  zlib/adler32.o zlib/deflate.o zlib/trees.o \
-	  zlib/inflate.o zlib/infblock.o zlib/inftrees.o zlib/infcodes.o \
-	  zlib/infutil.o zlib/inffast.o
+	  external/zlib/adler32.o external/zlib/deflate.o external/zlib/trees.o \
+	  external/zlib/inflate.o external/zlib/inftrees.o external/zlib/inffast.o \
+	  external/zlib/zutil.o external/zlib/crc32.o
 
 TMPFILES = gmon.out frag*
 

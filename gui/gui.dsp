@@ -270,7 +270,7 @@ SOURCE=.\thread.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\zlib\zlib.h
+SOURCE=..\external\zlib\zlib.h
 # End Source File
 # End Group
 # Begin Group "Resource Files"
