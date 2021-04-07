@@ -137,20 +137,13 @@ SFXVAR cdata_t oldcd, newcd;
 SFXVAR ent_t base[MAX_ENT], oldent[MAX_ENT], newent[MAX_ENT];
 extern direntry_t *directory;
 
-#ifndef DZIP_BIG_ENDIAN
-
-#define getshort(x) (*(short*)(x))
-#define getlong(x) (*(long*)(x))
-#define getfloat(x) (*(float*)(x))
-#define cnvlong(x) (x)
-
-#else
-
 short getshort (uchar *);
 long getlong (uchar *);
 float getfloat (uchar *);
+#ifndef DZIP_BIG_ENDIAN
+#define cnvlong(x) (x)
+#else
 #define cnvlong(x) getlong((uchar*)(&x))
-
 #endif
 
 #define Z_BUFFER_SIZE 16384

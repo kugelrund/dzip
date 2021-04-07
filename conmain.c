@@ -193,6 +193,31 @@ float getfloat (uchar *c)
 	return *(float*)(&l);
 }
 
+#else
+/* no byte swapping on little endian machines, just direct interpretation of
+   values as the respective type. Doing this in the C++20 "bit_cast" way to
+   avoid undefined behaviour. */
+short getshort (uchar *c)
+{
+	short s;
+	memcpy(&s, c, sizeof(short));
+	return s;
+}
+
+long getlong (uchar *c)
+{
+	long l;
+	memcpy(&l, c, sizeof(long));
+	return l;
+}
+
+float getfloat (uchar *c)
+{
+	float f;
+	memcpy(&f, c, sizeof(float));
+	return f;
+}
+
 #endif
 
 /* does not return if -e was specified on cmd line */

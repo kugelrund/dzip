@@ -518,15 +518,18 @@ void demx_updateentity(void)
 
 			if (n.fullbright)
 				f = 2;
-			tmp = cnvlong(*(int *)&f);
+			memcpy(&tmp, &f, sizeof(tmp));
+			tmp = cnvlong(tmp);
 			memcpy(ptr, &tmp, 4);
-			tmp = cnvlong(*(int *)&n.alpha);
+			memcpy(&tmp, &n.alpha, sizeof(tmp));
+			tmp = cnvlong(tmp);
 			memcpy(ptr + 4, &tmp, 4);
 			ptr += 8;
 			if (f == 2)
 			{
 				f = (char)(n.fullbright - 1);
-				tmp = cnvlong(*(int *)&f);
+				memcpy(&tmp, &f, sizeof(tmp));
+				tmp = cnvlong(tmp);
 				memcpy(ptr, &tmp, 4);
 				ptr += 4;
 			}
