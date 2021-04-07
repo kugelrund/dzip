@@ -479,6 +479,7 @@ int main (int argc, char **argv)
 	char *optr = NULL;
 	char **files;
 	char *fname;
+	char dzheader[12];
 
 #ifdef WIN32
 	WIN32_FIND_DATA fd;
@@ -579,10 +580,16 @@ int main (int argc, char **argv)
 		dzname = optr;
 		dzfile = open_create(optr);
 		if (!dzfile) exit(1);
-		i = 'D' + ('Z' << 8) + (MAJOR_VERSION<<16) + (MINOR_VERSION<<24);
-		i = cnvlong(i);
-		dzFile_Write(&i, 12);
-		totalsize = 12;
+		/* Write .dz header. First 4 bytes are the id. Following bytes are for
+		   offset and numfiles, so they can only be filled later on. For now
+		   write zeros to reserve the space for them. */
+		memset(dzheader, 0, sizeof(dzheader));
+		dzheader[0] = 'D';
+		dzheader[1] = 'Z';
+		dzheader[2] = MAJOR_VERSION;
+		dzheader[3] = MINOR_VERSION;
+		dzFile_Write(dzheader, sizeof(dzheader));
+		totalsize = sizeof(dzheader);
 
 		directory = Dzip_malloc(sizeof(direntry_t));
 
