@@ -194,7 +194,7 @@ void demv1_dxentities(void)
 		if (mask & 0xff00) mask |= 0x01;
 		buf[0] = mask & 0xff;
 		buf[1] = (mask & 0xff00) >> 8;
-		if (!(mask & 0x01)) { memcpy(buf+1,buf+2,ptr-buf-2); ptr--; }
+		if (!(mask & 0x01)) { memmove(buf+1,buf+2,ptr-buf-2); ptr--; }
 		insert_msg(buf,ptr-buf);
 		memcpy(oldent+i,newent+i,sizeof(ent_t));
 	}
@@ -261,7 +261,7 @@ void dzUncompressV1 (int testing)
 				Outfile_Write(inblk,blocksize);
 			}
 			if (blocksize != p_blocksize)
-				memcpy(inblk,inblk+blocksize,p_blocksize-blocksize);
+				memmove(inblk,inblk+blocksize,p_blocksize-blocksize);
 			readptr += blocksize;
 			inlen = p_blocksize - blocksize;
 		}

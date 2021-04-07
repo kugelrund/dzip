@@ -122,7 +122,7 @@ void dzExtractFile (uInt filepos, int testing)
 				Outfile_Write(inblk, blocksize);
 			}
 			if (blocksize != p_blocksize)
-				memcpy(inblk, inblk + blocksize, p_blocksize - blocksize);
+				memmove(inblk, inblk + blocksize, p_blocksize - blocksize);
 			readptr += blocksize;
 			inlen = p_blocksize - blocksize;
 		}

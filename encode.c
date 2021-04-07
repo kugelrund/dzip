@@ -179,11 +179,11 @@ int dem_clientdata(void)
 	tmp = cnvlong(mask);
 	memcpy(buf,&tmp,4);
 	if (!(mask & 0x08))
-		{ memcpy(buf+1,buf+4,ptr-buf-4); ptr -= 3; }
+		{ memmove(buf+1,buf+4,ptr-buf-4); ptr -= 3; }
 	else if (!(mask & 0x8000))
-		{ memcpy(buf+2,buf+4,ptr-buf-4); ptr -= 2; }
+		{ memmove(buf+2,buf+4,ptr-buf-4); ptr -= 2; }
 	else if (!(mask & 0x800000))
-		{ memcpy(buf+3,buf+4,ptr-buf-4); ptr -= 1; }
+		{ memmove(buf+3,buf+4,ptr-buf-4); ptr -= 1; }
 	insert_msg(buf,ptr-buf);
 
 	if (newcd.force != oldcd.force)
@@ -565,7 +565,7 @@ void diff_entities(void)
 		}
 		else
 		{
-			memcpy(tptr+3,tptr+4,ptr-tptr-4);
+			memmove(tptr+3,tptr+4,ptr-tptr-4);
 			ptr--;
 		}
 		if (mask & 0xffff00) mask |= 0x80;
@@ -585,9 +585,9 @@ void diff_entities(void)
 		memcpy(tptr,&tmp,3);
 
 		if (!(mask & 0xffff00))
-			{ memcpy(tptr+1,tptr+3,ptr-tptr-3); ptr -= 2; }
+			{ memmove(tptr+1,tptr+3,ptr-tptr-3); ptr -= 2; }
 		else if (!(mask & 0xff0000))
-			{ memcpy(tptr+2,tptr+3,ptr-tptr-3); ptr--; }
+			{ memmove(tptr+2,tptr+3,ptr-tptr-3); ptr--; }
 		tptr = ptr;
 	}
 

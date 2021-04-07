@@ -537,7 +537,7 @@ void demx_updateentity(void)
 		if (mask & 0xff00) mask |= 0x01;
 		buf[0] = mask & 0xff;
 		buf[1] = (mask & 0xff00) >> 8;
-		if (!(mask & 0x01)) { memcpy(buf+1,buf+2,ptr-buf-2); ptr--; }
+		if (!(mask & 0x01)) { memmove(buf+1,buf+2,ptr-buf-2); ptr--; }
 		insert_msg(buf,ptr-buf);
 
 		oldent[i] = newent[i];
