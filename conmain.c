@@ -139,6 +139,7 @@ FILE *open_create (char *src)
 		if ((f = fopen(src, "r"))) 
 		{
 			error("%s exists; will not overwrite", src);
+			fclose(f);
 			return NULL;
 		}
 
@@ -197,6 +198,7 @@ float getfloat (uchar *c)
 /* does not return if -e was specified on cmd line */
 void error (const char *msg, ...)
 {
+	FILE *f = flag[SW_HALT] ? stderr : stdout;
 	va_list	the_args;
 	va_start(the_args,msg);
 	if (flag[SW_HALT]) {
@@ -209,8 +211,8 @@ void error (const char *msg, ...)
 			fprintf(stderr,"ERROR: ");
 	} /* stupid compilers bitch about ambigious else */
 
-	vfprintf(stderr,msg,the_args);
-	fprintf(stderr,"\n");
+	vfprintf(f,msg,the_args);
+	fprintf(f,"\n");
 	va_end(the_args);
 	if (flag[SW_HALT])
 		exit(1);
@@ -228,35 +230,38 @@ void errorFatal (const char *msg, ...)
 	exit(1);
 }
 
-struct { char *name; int flag; }
-optname[] =
-	{ { "-l", SW_LIST },
-	  { "-x", SW_EXTRACT },
-	  { "-v", SW_VERIFY },
-	  { "-a", SW_ADD },
-	  { "-d", SW_DELETE },
-	  { "-f", SW_FORCE },
-	  { "-e", SW_HALT },
-	  { NULL, 0 }
-	};
+struct { char name; int flag; }
+optname[] = {
+	{ 'o', SW_OUTFILE },
+	{ 'l', SW_LIST },
+	{ 'x', SW_EXTRACT },
+	{ 's', SW_VIEW },
+	{ 'v', SW_VERIFY },
+	{ 'a', SW_ADD },
+	{ 'd', SW_DELETE },
+	{ 'f', SW_FORCE },
+	{ 'e', SW_HALT },
+	{ 0, 0 }
+};
 
 void parse_switch (char *arg)
 {
 	int i;
 
-	if (strlen(arg) == 2 && arg[1] >= '0' && arg[1] <= '9')
-	{
-		zlevel = arg[1] - '0';
-		return;
-	}
-
-	for (i = 0; optname[i].name; i++)
-		if (!strcmp(optname[i].name,arg))
+	while (*++arg)
+		if (*arg >= '0' && *arg <= '9')
+			zlevel = *arg - '0';
+		else
 		{
-			flag[optname[i].flag]++;
-			return;
+			for (i = 0; optname[i].name; i++)
+				if (*arg == optname[i].name)
+				{
+					flag[optname[i].flag]++;
+					break;
+				}
+			if (!optname[i].name)
+				errorFatal("unknown switch %s",arg);
 		}
-	errorFatal("unknown switch %s",arg);
 }
 
 void usage(void)
@@ -268,6 +273,7 @@ void usage(void)
 	"Add to existing dz:  dzip -a <dzfile> <filenames>\n"
 	"Delete from a dz:    dzip -d <dzfile> <filenames>\n"
 	"Decompression:       dzip -x <filenames>\n"
+	"View one file:       dzip -s <dzfile> [file to view]\n"
 	"Verify dz file:      dzip -v <filenames>\n"
 	"List dz file:        dzip -l <filenames>\n\n"
 
@@ -276,7 +282,7 @@ void usage(void)
 	"  -e: quit program on first error\n"
 	"  -f: overwrite existing files\n\n"
 
-	"Copyright 2000-2002 Stefan Schwoon, Nolan Pflug\n",
+	"Copyright 2000-2005 Stefan Schwoon, Nolan Pflug\n",
 	MAJOR_VERSION, MINOR_VERSION
     );
 
@@ -463,52 +469,79 @@ void DoFiles (char *fname, void (*func)(char *))
 	fclose(infile);
 	if (AbortOp == 3)	/* had a problem reading from infile */
 		AbortOp = 0;	/* but still try the rest of the files */
-
 #endif
 }
 
-int main(int argc, char **argv)
+int main (int argc, char **argv)
 {
-	int i, j, oflag = 0;
+	int i, switchflag = 0;
 	int fileargs = 0;
 	char *optr = NULL;
 	char **files;
 	char *fname;
 
-	if (argc < 2) usage();
+#ifdef WIN32
+	WIN32_FIND_DATA fd;
+#else
+	struct stat64 filestats;
+#endif
 
+	if (argc < 2)
+		usage();
+
+	files = Dzip_malloc(argc * 4);
 	for (i = 1; i < argc; i++)
-		if (!strcmp(argv[i],"-o"))
-			oflag = 1;
-		else if (*argv[i] == '-')
+		if (*argv[i] == '-' && switchflag != 1)
+		{	/* check for '--' switch first */
+			if (argv[i][1] == '-' && !argv[i][2])
+			{
+				switchflag = 1;
+				continue;
+			}
 			parse_switch(argv[i]);
-		else if (oflag)
-			optr = argv[i];
+			if (flag[SW_OUTFILE] && switchflag != 2)
+			{	/* if switch contained an o, get the output file */
+				if (i == argc - 1)
+					errorFatal("-o without argument");
+				optr = argv[++i];
+				switchflag = 2;
+			}
+		}
 		else
-			fileargs++;
+			files[fileargs++] = argv[i];
 
-	if (!fileargs) errorFatal("no input files");
-	j = !!flag[SW_LIST] + !!flag[SW_EXTRACT]
-		+ !!flag[SW_VERIFY] + !!flag[SW_ADD] + !!flag[SW_DELETE];
-	if (j > 1) errorFatal("conflicting switches");
-	if (oflag && j == 1) errorFatal("-o invalid with other switches");
-	if (oflag && !optr) errorFatal("-o without argument");
+	if (!fileargs)
+		errorFatal("no input files");
+	if (1 < !!flag[SW_LIST] + !!flag[SW_EXTRACT] + !!flag[SW_VIEW]
+		+ !!flag[SW_VERIFY] + !!flag[SW_ADD] + !!flag[SW_DELETE]
+		+ !!flag[SW_OUTFILE])
+		errorFatal("conflicting switches");
 
 	crc_init();
 	inblk = Dzip_malloc(p_blocksize * 3);
 	outblk = inblk + p_blocksize;
 	tmpblk = outblk + p_blocksize / 2;
 	zbuf = tmpblk + p_blocksize / 2;
-
-	files = Dzip_malloc(fileargs * 4);
-	for (i = 1, j = 0; i < argc; i++)
-	{
-		if (*argv[i] != '-') files[j++] = argv[i];
-		if (!strcmp(argv[i],"-o")) i++;
-	}
-
 	zs.zalloc = Dzip_calloc;
 	zs.zfree = free;
+
+	if (flag[SW_VIEW])
+	{
+		if (fileargs > 2)
+			errorFatal("only one file can be viewed at once");
+	#ifdef WIN32
+		FindClose(FindFirstFile(files[0], &fd));
+		if (!fd.nFileSizeHigh)
+			dzsize = fd.nFileSizeLow;
+	#else
+		if (!stat64(files[0], &filestats))
+			if (!(filestats.st_size > 0xFFFFFFFF))
+				dzsize = filestats.st_size;
+	#endif
+
+		dzViewFile(files[0], (fileargs < 2) ? NULL : files[1]);
+		exit(0);
+	}
 
 	if (flag[SW_LIST] || flag[SW_EXTRACT] || flag[SW_VERIFY])
 	{
@@ -572,29 +605,25 @@ int main(int argc, char **argv)
 	/* add or delete */
 	if (fileargs < 2)
 		errorFatal("no input files");
+#ifdef WIN32
 	fname = Dzip_malloc(strlen(files[0])+4);
 	strcpy(fname,files[0]);
-#ifdef WIN32
 	if (!*FileExtension(fname))
 		strcat(fname, ".dz");
+#else
+	fname = files[0];
 #endif
-	dzsize = 0;
-	/* figure out dzsize */
-	{
-#ifdef WIN32
-	WIN32_FIND_DATA fd;
 
+	/* figure out dzsize */
+#ifdef WIN32
 	FindClose(FindFirstFile(fname, &fd));
 	if (!fd.nFileSizeHigh)
 		dzsize = fd.nFileSizeLow;
 #else
-	struct stat64 filestats;
-
 	if (!stat64(fname, &filestats))
 		if (!(filestats.st_size > 0xFFFFFFFF))
 			dzsize = filestats.st_size;
 #endif
-	}
 
 	if (!dzOpen(fname, 1))	/* add & delete need write access */
 		exit(0);

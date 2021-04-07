@@ -616,7 +616,10 @@ uInt dem_uncompress_block(void)
 			else if ((*inptr & 0xf8) == 0x38)
 				demx_sound();
 			else if (*inptr >= 0x80)
-				dem_copy_ue();
+			{
+				if (!dem_copy_ue())
+					return 0;
+			}
 			else
 				return 0;
 		}
@@ -657,6 +660,8 @@ uInt dem_uncompress (uInt maxsize)
 	}
 	while (blocksize < 16000 && blocksize < maxsize)
 	{
+		if (AbortOp)
+			return 0;
 		if (*inptr == 0xff)
 		{
 			uInt len = getlong(inptr+1);

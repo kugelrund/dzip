@@ -1,31 +1,6 @@
 #include "dzip.h"
 
-void dem_nop(void)
-{
-	copy_msg(1);
-}
-
-void dem_disconnect(void)
-{
-	copy_msg(1);
-}
-
-void dem_updatestat(void)
-{
-	copy_msg(6);
-}
-
-void dem_version(void)
-{
-	copy_msg(5);
-}
-
-void dem_setview(void)
-{
-	copy_msg(3);
-}
-
-void dem_sound(void)
+int dem_sound(void)
 {
 	uchar mask = inptr[1];
 	int len = 11;
@@ -53,9 +28,10 @@ void dem_sound(void)
 	memcpy(inptr+len-9,&chanent,2);
 	discard_msg(1);
 	copy_msg(len-1);
+	return 0;
 }
 
-void dem_time(void)
+int dem_time(void)
 {
 	long tmp = getlong(inptr+1) - dem_gametime;
 	dem_gametime = getlong(inptr+1);
@@ -63,22 +39,19 @@ void dem_time(void)
 	memcpy(inptr+1,&tmp,4);
 	if (inptr[3] || inptr[4]) { *inptr = DZ_longtime; copy_msg(5); }
 	else { copy_msg(3); discard_msg(2); }
+	return 0;
 }
 
 /* used by lots of msgs */
-void dem_string(void)
+int dem_string(void)
 {
 	uchar *ptr = inptr + 1;
 	while (*ptr++);
 	copy_msg(ptr-inptr);
+	return 0;
 }
 
-void dem_setangle(void)
-{
-	copy_msg(4);
-}
-
-void dem_serverinfo(void)
+int dem_serverinfo(void)
 {
 	uchar *ptr = inptr + 7;
 	uchar *start_ptr;
@@ -94,25 +67,23 @@ void dem_serverinfo(void)
 	} while (ptr - start_ptr > 1);
 	copy_msg(ptr-inptr);
 	sble = 0;
+	return 0;
 }
 
-void dem_lightstyle(void)
+int dem_lightstyle(void)
 {
 	uchar *ptr = inptr + 2;
 	while (*ptr++);
 	copy_msg(ptr-inptr);
+	return 0;
 }
 
-void dem_updatename(void)
+int dem_updatename(void)
 {
 	uchar *ptr = inptr + 2;
 	while (*ptr++);
 	copy_msg(ptr-inptr);
-}
-
-void dem_updatefrags(void)
-{
-	copy_msg(4);
+	return 0;
 }
 
 uchar bdiff(int x, int y)
@@ -122,7 +93,7 @@ uchar bdiff(int x, int y)
 	return d & 0xff;
 }
 
-void dem_clientdata(void)
+int dem_clientdata(void)
 {
 	uchar buf[32];
 	uchar *ptr = inptr+3;
@@ -225,39 +196,10 @@ void dem_clientdata(void)
 	}
 
 	oldcd = newcd;
+	return 0;
 }
 
-void dem_stopsound(void)
-{
-	copy_msg(3);
-}
-
-void dem_updatecolors(void)
-{
-	copy_msg(3);
-}
-
-void dem_particle(void)
-{
-	copy_msg(12);
-}
-
-void dem_damage(void)
-{
-	copy_msg(9);
-}
-
-void dem_spawnstatic(void)
-{
-	copy_msg(14);
-}
-
-void dem_spawnbinary(void)
-{
-	copy_msg(1);
-}
-
-void dem_spawnbaseline(void)
+int dem_spawnbaseline(void)
 {
 	uchar buf[16], *ptr;
 	ent_t ent;
@@ -302,70 +244,29 @@ void dem_spawnbaseline(void)
 	base[index] = ent;
 	sble = index;
 	copybaseline = 1;
+	return 0;
 }
 
-const uchar te_size[] = {8, 8,  8,  8, 8, 16, 16, 8, 8, 16,
-				  8, 8, 10, 16, 8,  8, 14};
+const uchar te_size[] = {8, 8, 8, 8, 8, 16, 16, 8, 8, 16,
+				  8, 8, 10, 16, 8, 8, 14};
 
-void dem_temp_entity(void)
+int dem_temp_entity(void)
 {
 	uchar entitytype = inptr[1];
-	if (entitytype >= 16)
+	if (entitytype == 17)
 	{
 		directory[numfiles].type = TYPE_NEHAHRA;
-		if (entitytype == 17)
-		{
-			copy_msg(strlen(inptr + 2) + 17);
-			return;
-		}
-		if (entitytype > 17) /* this should be a bailout */
-			error("entitytype is %i", entitytype);
+		copy_msg(strlen(inptr + 2) + 17);
+		return 0;
 	}
+	if (entitytype > 17)
+		return 1;
 	copy_msg(te_size[entitytype]);
-}
-
-void dem_setpause(void)
-{
-	copy_msg(2);
-}
-
-void dem_signonnum(void)
-{
-	copy_msg(2);
-}
-
-void dem_killedmonster(void)
-{
-	copy_msg(1);
-}
-
-void dem_foundsecret(void)
-{
-	copy_msg(1);
-}
-
-void dem_spawnstaticsound(void)
-{
-	copy_msg(10);
-}
-
-void dem_intermission(void)
-{
-	copy_msg(1);
-}
-
-void dem_cdtrack(void)
-{
-	copy_msg(3);
-}
-
-void dem_sellscreen(void)
-{
-	copy_msg(1);
+	return 0;
 }
 
 /* nehahra */
-void dem_showlmp(void)
+int dem_showlmp(void)
 {
 	uchar *ptr = inptr + 1;
 	while (*ptr++);
@@ -374,52 +275,58 @@ void dem_showlmp(void)
 	*inptr = DZ_showlmp;	/* DEM_showlmp (35) is used by DZ_longtime */
 	copy_msg(ptr-inptr);
 	directory[numfiles].type = TYPE_NEHAHRA;
+	return 0;
 }
 
-void dem_hidelmp(void)
+int dem_hidelmp(void)
 {
 	uchar *ptr = inptr + 1;
 	while (*ptr++);
 	copy_msg(ptr-inptr);
 	directory[numfiles].type = TYPE_NEHAHRA;
+	return 0;
 }
 
-void dem_skybox(void)
+int dem_skybox(void)
 {
 	uchar *ptr = inptr + 1;
 	while (*ptr++);
 	copy_msg(ptr-inptr);
 	directory[numfiles].type = TYPE_NEHAHRA;
+	return 0;
 }
 /* end nehahra */
 
-void dem_copy_ue(void)
-{
-	uchar mask = inptr[0] & 0x7f;
-	uchar topmask;
+int dem_copy_ue(void)
+{	/* 2.10: changed this to look more like uwe's demospecs */
+	unsigned short mask = inptr[0] & 0x7f;
 	int len = 1;
 
-	topmask = (mask & 0x01)? inptr[len++] : 0x00;
-	if (topmask & 0x40) len += 2; else len++;
-	if (topmask & 0x04) len++;
-	if (mask & 0x40) len++;
-	if (topmask & 0x08) len++;
-	if (topmask & 0x10) len++;
-	if (topmask & 0x20) len++;
-	if (mask & 0x02) len += 2;
-	if (topmask & 0x01) len++;
-	if (mask & 0x04) len += 2;
-	if (mask & 0x10) len++;
-	if (mask & 0x08) len += 2;
-	if (topmask & 0x02) len++;
-	if (topmask & 0x80) /* this should be a bailout */
-		error("dem_copy_ue(): topmask & 0x80");
-	copy_msg(len);
+	if (mask & 0x0001)
+	{
+		mask |= inptr[len++] << 8;
+		if (mask & 0x8000)
+			return 0;
+	}
+	if (mask & 0x4000) len++;	/* entity number */
+	if (mask & 0x0400) len++;	/* model index */
+	if (mask & 0x0040) len++;	/* frame */
+	if (mask & 0x0800) len++;	/* colormap */
+	if (mask & 0x1000) len++;	/* skin */
+	if (mask & 0x2000) len++;	/* effects */
+	if (mask & 0x0002) len += 2;/* origin[0] */
+	if (mask & 0x0100) len++;	/* angles[0] */
+	if (mask & 0x0004) len += 2;/* origin[1] */
+	if (mask & 0x0010) len++;	/* angles[1] */
+	if (mask & 0x0008) len += 2;/* origin[2] */
+	if (mask & 0x0200) len++;	/* angles[2] */
+	copy_msg(len + 1);	// add one more for entity number
+	return 1;
 }
 
 void diff_entities(void);
 
-void dem_updateentity(void)
+int dem_updateentity(void)
 {
 	uchar mask = *inptr & 0x7f;
 	uchar topmask;
@@ -436,7 +343,7 @@ void dem_updateentity(void)
 	if (dem_updateframe == 2)
 	{
 		dem_copy_ue();
-		return;
+		return 0;
 	}
 
 	topmask = (mask & 0x01)? inptr[len++] : 0;
@@ -452,7 +359,7 @@ void dem_updateentity(void)
 		diff_entities();
 		dem_updateframe = 2;
 		dem_copy_ue();
-		return;
+		return 0;
 	}
 	lastentity = entity;
 
@@ -493,16 +400,15 @@ void dem_updateentity(void)
 	{
 		float tmp = getfloat(inptr + len);
 		directory[numfiles].type = TYPE_NEHAHRA;
-		if (tmp != 2 && tmp != 1) /* this should be a bailout */
-			error("nehahra: tmp is %f\n", tmp);
+		if (tmp != 2 && tmp != 1)
+			return 1;
 		newent[entity].alpha = getfloat(inptr + len + 4);
 		len += 8;
 		if (tmp == 2)
 		{
 			newent[entity].fullbright = 1 + (int)getfloat(inptr + len);
 			if (newent[entity].fullbright != 2 && newent[entity].fullbright != 1)
-			/* this should be a bailout */
-				error("nehahra: fullbright is %f\n", getfloat(inptr + len));
+				return 1;
 			len += 4;
 		}
 		else newent[entity].fullbright = 0;
@@ -523,19 +429,28 @@ void dem_updateentity(void)
 	}
 
 	discard_msg(len);
+	return 0;
 }
 
-void (* const dem_message[])(void) = {
-	dem_nop, dem_disconnect, dem_updatestat, dem_version,
-	dem_setview, dem_sound, dem_time, dem_string, dem_string,
-	dem_setangle, dem_serverinfo, dem_lightstyle, dem_updatename,
-	dem_updatefrags, dem_clientdata, dem_stopsound, dem_updatecolors,
-	dem_particle, dem_damage, dem_spawnstatic, dem_spawnbinary,
-	dem_spawnbaseline, dem_temp_entity, dem_setpause, dem_signonnum,
-	dem_string, dem_killedmonster, dem_foundsecret,
-	dem_spawnstaticsound, dem_intermission, dem_string,
-	dem_cdtrack, dem_sellscreen, dem_string,
+int (* const dem_message[])(void) = {
+	NULL, NULL, NULL, NULL,
+	NULL, dem_sound, dem_time, dem_string,
+	dem_string,	NULL, dem_serverinfo, dem_lightstyle,
+	dem_updatename,	NULL, dem_clientdata, NULL,
+	NULL, NULL, NULL, NULL,
+	NULL, dem_spawnbaseline, dem_temp_entity, NULL,
+	NULL, dem_string, NULL, NULL,
+	NULL, NULL, dem_string, NULL,
+	NULL, dem_string,
 	dem_showlmp, dem_hidelmp, dem_skybox	/* nehahra */
+};
+
+/* 2.10: removed all the dem_* functions that just did
+	copy_msg(#) and replaced with this */
+const uchar constCopy[] = {
+	1, 1, 6, 5, 3, 0, 0, 0, 0, 4, 0, 0, 0, 4, 0, 3,
+	3,12, 9,14, 1, 0, 0, 2, 2, 0, 1, 1,10, 1, 0, 3,
+	1, 0, 0, 0, 0
 };
 
 void update_activate(int i, int *baseval, uchar *buf)
@@ -789,10 +704,18 @@ tryit:
 					diff_entities();
 					dem_updateframe = 2;
 				}
-				dem_message[(int)(*inptr - 1)]();
+				if (constCopy[(int)(*inptr - 1)])
+					copy_msg(constCopy[(int)(*inptr - 1)]);
+				else if (dem_message[(int)(*inptr - 1)]())
+					bail("unexpected message contents encountered");
 			}
-			else if (*inptr & 0x80) dem_updateentity();
-			else bail("bad message encountered");
+			else if (*inptr & 0x80)
+			{
+				if (dem_updateentity())
+					bail("unexpected message contents encountered");
+			}
+			else
+				bail("bad message encountered");
 		}
 		if (dem_updateframe == 1) diff_entities();
 

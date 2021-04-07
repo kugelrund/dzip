@@ -8,7 +8,7 @@ typedef unsigned char uchar;
 
 #define MAX_ENT 1024
 #define MAJOR_VERSION 2
-#define MINOR_VERSION 9
+#define MINOR_VERSION 10
 #define INITCRC 0xffffffff
 
 enum { TYPE_NORMAL, TYPE_DEMV1, TYPE_TXT, TYPE_PAK, TYPE_DZ, TYPE_DEM,
@@ -78,7 +78,7 @@ void copy_msg (uInt);
 void create_clientdata_msg (void);
 void crc_init (void);
 void dem_compress (uInt, uInt);
-void dem_copy_ue (void);
+int dem_copy_ue (void);
 uInt dem_uncompress (uInt);
 void dem_uncompress_init (int);
 void demv1_clientdata (void);
@@ -86,7 +86,7 @@ void demv1_updateentity (void);
 void demv1_dxentities (void);
 void dzAddFolder (char *);
 void dzCompressFile (char *, uInt, uInt);
-void dzDeleteFiles  (uInt *, int, void (*)(uInt, uInt));
+void dzDeleteFiles  (uInt *, uInt, void (*)(uInt, uInt));
 void dzExtractFile (uInt, int);
 int dzRead (int);
 int dzReadDirectory (char *);
@@ -133,8 +133,6 @@ SFXVAR long outlen;
 SFXVAR long cam0, cam1, cam2;
 SFXVAR uchar *inblk, *outblk, *inptr;
 extern uchar *tmpblk;
-extern char AbortOp;
-extern unsigned long crcval;
 SFXVAR cdata_t oldcd, newcd;
 SFXVAR ent_t base[MAX_ENT], oldent[MAX_ENT], newent[MAX_ENT];
 extern direntry_t *directory;
@@ -163,10 +161,39 @@ extern int zlevel;
 
 #ifdef GUI
 
-void GuiProgressMsg(const char *, ...);
 #define printf
 #define fprintf
 #define fflush
+
+#include "gui\gui_export.h"
+
+#define AbortOp *ge.AbortOp
+#define crcval *ge.crcval
+#define dzFile_Read ge.ArchiveFile_Read
+#define dzFile_Write ge.ArchiveFile_Write
+#define dzFile_Size ge.ArchiveFile_Size
+#define dzFile_Seek ge.ArchiveFile_Seek
+#define dzFile_Truncate ge.ArchiveFile_Truncate
+#define Dzip_malloc ge.malloc
+#define Dzip_realloc ge.realloc
+#define Dzip_strdup ge.strdup
+#define GuiProgressMsg ge.GuiProgressMsg
+#define Infile_Read ge.Infile_Read
+#define Infile_Seek ge.Infile_Seek
+#define Infile_Store ge.Infile_Store
+#define Outfile_Write ge.Outfile_Write
+#define error ge.error
+#define deflate ge.deflate
+#define deflateEnd ge.deflateEnd
+#define deflateInit ge.deflateInit
+#define inflate ge.inflate
+#define inflateEnd ge.inflateEnd
+#define inflateInit ge.inflateInit
+
+#else
+
+extern char AbortOp;
+extern unsigned long crcval;
 
 #endif
 

@@ -1,5 +1,5 @@
-unsigned long crcval;
 unsigned long crctable[256];
+unsigned long crcval;
 
 unsigned long crc_reflect(unsigned long x, int bits)
 {

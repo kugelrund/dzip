@@ -1,0 +1,68 @@
+<html>
+<body>
+<pre>
+<h1>Build Log</h1>
+<h3>
+--------------------Configuration: dzip_dz - Win32 Release--------------------
+</h3>
+<h3>Command Lines</h3>
+Creating command line "rc.exe /l 0x409 /fo"Release/dzip_dz.res" /d "NDEBUG" "C:\games\quake\dzip\gui\dzip_dz\dzip_dz.rc"" 
+Creating temporary file "C:\DOCUME~1\NOLANP~1\LOCALS~1\Temp\RSP10BC.tmp" with contents
+[
+/nologo /G6 /MD /W3 /Oa /Ow /Og /Oi /Os /Oy /Ob1 /Gy /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "DZIP_DZ_EXPORTS" /D "GUI" /Fp"Release/dzip_dz.pch" /YX /Fo"Release/" /Fd"Release/" /FD /GF /c 
+"C:\games\quake\dzip\compress.c"
+"C:\games\quake\dzip\decode.c"
+"C:\games\quake\dzip\delete.c"
+"C:\games\quake\dzip\gui\dzip_dz\dllmain.c"
+"C:\games\quake\dzip\gui\dzip_dz\dz.c"
+"C:\games\quake\dzip\encode.c"
+"C:\games\quake\dzip\main.c"
+"C:\games\quake\dzip\gui\dzip_dz\sfx.c"
+"C:\games\quake\dzip\uncompress.c"
+]
+Creating command line "cl.exe @C:\DOCUME~1\NOLANP~1\LOCALS~1\Temp\RSP10BC.tmp" 
+Creating temporary file "C:\DOCUME~1\NOLANP~1\LOCALS~1\Temp\RSP10BD.tmp" with contents
+[
+/nologo /base:"0x1440000" /dll /incremental:no /pdb:"Release/dzip_dz.pdb" /map:"Release/dzip_dz.map" /machine:I386 /out:"..\..\..\dzip_dz.dll" /implib:"Release/dzip_dz.lib" /merge:.rdata=.text /filealign:512 /opt:ref,icf 
+.\Release\compress.obj
+.\Release\decode.obj
+.\Release\delete.obj
+.\Release\dllmain.obj
+.\Release\dz.obj
+.\Release\encode.obj
+.\Release\main.obj
+.\Release\sfx.obj
+.\Release\uncompress.obj
+.\Release\dzip_dz.res
+]
+Creating command line "link.exe @C:\DOCUME~1\NOLANP~1\LOCALS~1\Temp\RSP10BD.tmp"
+<h3>Output Window</h3>
+Compiling resources...
+Compiling...
+compress.c
+decode.c
+delete.c
+dllmain.c
+dz.c
+encode.c
+main.c
+sfx.c
+uncompress.c
+Linking...
+   Creating library Release/dzip_dz.lib and object Release/dzip_dz.exp
+LINK : warning LNK4078: multiple ".text" sections found with different attributes (40000040)
+Creating temporary file "C:\DOCUME~1\NOLANP~1\LOCALS~1\Temp\RSP10C1.bat" with contents
+[
+@echo off
+..\buildhelper\debug\buildhelper -h2 ..\..\..\dzip_dz.dll "dll"
+]
+Creating command line "C:\DOCUME~1\NOLANP~1\LOCALS~1\Temp\RSP10C1.bat"
+Shrinking dzip_dz.dll
+
+
+
+<h3>Results</h3>
+dzip_dz.dll - 0 error(s), 1 warning(s)
+</pre>
+</body>
+</html>

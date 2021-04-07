@@ -1,12 +1,6 @@
 #include "dzip.h"
 
-int intcmp (const uInt *arg1, const uInt *arg2)
-{
-	if (*arg1 < *arg2) return -1;
-	return 1;
-}
-
-void dzDeleteFiles (uInt *list, int num, void (*Progress)(uInt, uInt))
+void dzDeleteFiles (uInt *list, uInt num, void (*Progress)(uInt, uInt))
 {
 	uInt i, j, m, listnum, fposdelta, dedelta, curpos, togo;
 	unsigned short pakdelta;
@@ -18,8 +12,6 @@ void dzDeleteFiles (uInt *list, int num, void (*Progress)(uInt, uInt))
 	pakdelta = 0;
 	m = list[0];	/* used for crude progress bar */
 
-	qsort(list, num, 4, intcmp);
-
 	for (i = 0; i < (uInt)numfiles; i++)
 	{
 		de = directory + i;
@@ -29,7 +21,7 @@ void dzDeleteFiles (uInt *list, int num, void (*Progress)(uInt, uInt))
 		else
 			pakdelta = 0;
 
-		if (list[listnum] == i)
+		if (listnum < num && list[listnum] == i)
 		{	/* this file is being deleted */
 			listnum++;
 		#ifdef GUI
@@ -80,7 +72,7 @@ void dzDeleteFiles (uInt *list, int num, void (*Progress)(uInt, uInt))
 			togo -= j;
 		}
 		if (Progress)
-			Progress(i - m, numfiles - m);
+			Progress(i - m, numfiles - m - 1);
 	}
 
 	numfiles -= dedelta;
@@ -92,6 +84,12 @@ void dzDeleteFiles (uInt *list, int num, void (*Progress)(uInt, uInt))
 #ifndef GUI
 
 #include "dzipcon.h"
+
+int intcmp (const uInt *arg1, const uInt *arg2)
+{
+	if (*arg1 < *arg2) return -1;
+	return 1;
+}
 
 /* create list[] array from command prompt files list */
 void dzDeleteFiles_MakeList (char **files, int num)
@@ -125,7 +123,8 @@ void dzDeleteFiles_MakeList (char **files, int num)
 			printf("deleted %s\n", dzname);
 	}
 	else
-	{
+	{	// sort the list
+		qsort(list, num, 4, intcmp);
 		dzDeleteFiles(list, num, NULL);
 		dzClose();
 	}

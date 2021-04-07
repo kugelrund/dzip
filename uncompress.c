@@ -17,7 +17,7 @@ void dzExtractFile (uInt filepos, int testing)
 
 	crcval = INITCRC;
 	dzFile_Seek(de->ptr);
-	
+
 	if (de->type == TYPE_PAK)
 	{
 		struct {
@@ -35,6 +35,8 @@ void dzExtractFile (uInt filepos, int testing)
 		pakheader.id = pakid;
 		pakheader.size = de->pak * sizeof(pakentry_t);
 		pakheader.offset = de->real - pakheader.size;
+		pakheader.size = cnvlong(pakheader.size);	// thanks mwh
+		pakheader.offset = cnvlong(pakheader.offset);
 		Outfile_Write(&pakheader, 12);
 		for (i = 0; i < de->pak; i++)
 		{
@@ -64,6 +66,8 @@ void dzExtractFile (uInt filepos, int testing)
 		strcpy(pakdir[de->pak - 1].name, de->name);
 		pakdir[de->pak - 1].len = de->real;
 		pakdir[de->pak - 1].ptr = pakptr;
+		pakdir[de->pak - 1].len = cnvlong(pakdir[de->pak - 1].len);
+		pakdir[de->pak - 1].ptr = cnvlong(pakdir[de->pak - 1].ptr);
 		pakptr += de->real;
 	}
 
@@ -211,6 +215,37 @@ void dzUncompress (char *src)
 
 		setfiledate(de->name, de->date);
 	}
+	printf("\n");
+	dzClose();
+}
+
+void dzViewFile (char *src, char *file)
+{
+	direntry_t *de;
+	int i;
+
+	if (!dzOpen(src, 0))
+		return;
+
+	for (i = 0; i < numfiles; i += de->pak + 1)
+	{
+		de = directory + i;
+		if (!file)
+		{
+			if (strcasecmp(FileExtension(de->name), ".txt"))
+				continue;
+		}
+		else if (strcasecmp(de->name, file))
+			continue;
+
+		outfile = stderr;
+		fclose(stdout);
+		dzExtractFile(i, 0);
+		fprintf(stderr, "\n");
+		break;
+	}
+	if (i == numfiles)
+		printf("%s not found inside %s", file ? file : "*.txt", src);
 	printf("\n");
 	dzClose();
 }
