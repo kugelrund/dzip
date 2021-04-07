@@ -175,7 +175,7 @@ void *Dzip_calloc (uInt size)
 	return memset(Dzip_malloc(size), 0, size);
 }
 
-#ifdef BIG_ENDIAN
+#ifdef DZIP_BIG_ENDIAN
 /* byte swapping on big endian machines */
 short getshort (uchar *c)
 {

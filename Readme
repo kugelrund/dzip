@@ -20,7 +20,7 @@ Compiling Dzip itself is very straightforward;
 an example Makefile for gcc on linux or solaris is included.
 
 * For Solaris (or big-endian machines in general), it is necessary to define
-  BIG_ENDIAN.
+  DZIP_BIG_ENDIAN.
 
 
 Technical information:

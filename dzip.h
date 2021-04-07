@@ -137,7 +137,7 @@ SFXVAR cdata_t oldcd, newcd;
 SFXVAR ent_t base[MAX_ENT], oldent[MAX_ENT], newent[MAX_ENT];
 extern direntry_t *directory;
 
-#ifndef BIG_ENDIAN
+#ifndef DZIP_BIG_ENDIAN
 
 #define getshort(x) (*(short*)(x))
 #define getlong(x) (*(long*)(x))
