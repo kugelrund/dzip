@@ -290,7 +290,7 @@ int AddGetFilenames(void)
 	ofn.hwndOwner = MainWnd;
 	ofn.lpstrFilter = "All Files\0*.*\0dem,txt,pak,dz Files\0*.dem;*.txt;*.pak;*.dz\0";
 	ofn.nFilterIndex = 2 - Options.AllFilesInAdd;
-	ofn.lpstrFile = Dzip_calloc(256);
+	ofn.lpstrFile = Dzip_calloc(NULL, 1, 256);
 	ofn.nMaxFile = 256;
 	ofn.lpstrInitialDir = temp2;
 	ofn.lpstrTitle = "Add";

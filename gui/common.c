@@ -88,9 +88,19 @@ char *Dzip_strdup(const char *str)
 	return m;		
 }
 
-void *Dzip_calloc (UINT size)
+void *Dzip_calloc (void* opaque, UINT items, UINT size)
 {
-	return memset(Dzip_malloc(size), 0, size);
+	(void)opaque;
+	void* m;
+	while (!(m = calloc(items, size)))
+		error("Out of memory!\nFree some memory and hit OK");
+	return m;
+}
+
+void Dzip_free (void* opaque, void* address)
+{
+	(void)opaque;
+	free(address);
 }
 
 void CenterDialog (HWND hDlg)

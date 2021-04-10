@@ -69,7 +69,7 @@ void CreateToolbar(void)
 		big = Dzip_malloc(0x5F04);
 		gray = (BITMAPINFO *)((char *)big + 0x3F88);
 		zs.zalloc = Dzip_calloc;
-		zs.zfree = free;
+		zs.zfree = Dzip_free;
 		inflateInit(&zs);
 		zs.avail_in = 0x19C9;
 		zs.next_in = LoadResource(hInstance, 
