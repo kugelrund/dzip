@@ -1,3 +1,4 @@
+#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -138,7 +139,7 @@ SFXVAR ent_t base[MAX_ENT], oldent[MAX_ENT], newent[MAX_ENT];
 extern direntry_t *directory;
 
 short getshort (uchar *);
-long getlong (uchar *);
+int32_t getlong (uchar *);
 float getfloat (uchar *);
 #ifndef DZIP_BIG_ENDIAN
 #define cnvlong(x) (x)

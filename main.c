@@ -206,7 +206,7 @@ short getshort (uchar *c)
 	return (c[1] << 8) + c[0];
 }
 
-long getlong (uchar *c)
+int32_t getlong (uchar *c)
 {
 	return (c[3] << 24) + (c[2] << 16) + (c[1] << 8) + c[0];
 }
@@ -228,10 +228,10 @@ short getshort (uchar *c)
 	return s;
 }
 
-long getlong (uchar *c)
+int32_t getlong (uchar *c)
 {
-	long l;
-	memcpy(&l, c, sizeof(long));
+	int32_t l;
+	memcpy(&l, c, sizeof(int32_t));
 	return l;
 }
 

@@ -380,7 +380,7 @@ void demx_updateentity(void)
 	int mask, i, entity;
 	int baseval = 0, prev;
 	ent_t n, o;
-	long tmp;
+	int32_t tmp;
 
 #ifndef GUI
 	if (dem_decode_type == TYPE_DEMV1) { demv1_updateentity(); return; }

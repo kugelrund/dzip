@@ -472,7 +472,7 @@ int main (int argc, char **argv)
 	if (argc < 2)
 		usage();
 
-	files = Dzip_malloc(argc * 4);
+	files = Dzip_malloc(argc * sizeof(char*));
 	for (i = 1; i < argc; i++)
 		if (*argv[i] == '-' && switchflag != 1)
 		{	/* check for '--' switch first */
