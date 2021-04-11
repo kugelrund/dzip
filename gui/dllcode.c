@@ -34,9 +34,9 @@ int deflateInitWrapped(z_streamp strm, int level)
 	return deflateInit(strm, level);
 }
 
-int inflateInitWrapped(z_streamp strm, int level)
+int inflateInitWrapped(z_streamp strm)
 {
-	return inflateInit(strm, level);
+	return inflateInit(strm);
 }
 
 const gui_export_t ge = {
