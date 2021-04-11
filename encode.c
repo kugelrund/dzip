@@ -1,15 +1,17 @@
 #include "dzip.h"
 
+#include <assert.h>
+
 int dem_sound(void)
 {
 	uchar mask = inptr[1];
 	int len = 11;
 	uInt chanent, c, entity;
 
-	if (mask & 0x01) len++;
-	if (mask & 0x02) len++;
+	if (mask & SND_VOLUME) len++;
+	if (mask & SND_ATTENUATION) len++;
 
-	inptr[1] = 0x38+mask;
+	inptr[1] = DZ_IDENTIFIER_SOUND+mask;
 	chanent = getshort(inptr+len-9) & 0xffff;
 	entity = chanent >> 3;
 	chanent = (entity << 3) | ((2-(chanent & 0x07)) & 0x07);
@@ -106,21 +108,32 @@ int dem_clientdata(void)
 
 	#define CFDIFF(x,def,bit) if (newcd.x == def) newcd.force |= bit;
 
-	if (mask & 0x0001) { newcd.voz = *ptr++; CFDIFF(voz,22,0x0800); }
-	if (mask & 0x0002) { newcd.pax = *ptr++; CFDIFF(pax,0,0x1000); }
-	if (mask & 0x0004) { newcd.ang0 = *ptr++; CFDIFF(ang0,0,0x0100); }
-	if (mask & 0x0020) { newcd.vel0 = *ptr++; CFDIFF(vel0,0,1); }
-	if (mask & 0x0008) { newcd.ang1 = *ptr++; CFDIFF(ang1,0,0x0200); }
-	if (mask & 0x0040) { newcd.vel1 = *ptr++; CFDIFF(vel1,0,2); }
-	if (mask & 0x0010) { newcd.ang2 = *ptr++; CFDIFF(ang2,0,0x0400); }
-	if (mask & 0x0080) { newcd.vel2 = *ptr++; CFDIFF(vel2,0,4); }
+	if (mask & SU_VIEWHEIGHT)
+		{ newcd.voz = *ptr++; CFDIFF(voz,22,DZ_CD_VIEWHEIGHT_FORCE); }
+	if (mask & SU_IDEALPITCH)
+		{ newcd.pax = *ptr++; CFDIFF(pax,0,DZ_CD_IDEALPITCH_FORCE); }
+	if (mask & SU_PUNCH0)
+		{ newcd.ang0 = *ptr++; CFDIFF(ang0,0,DZ_CD_PUNCH0_FORCE); }
+	if (mask & SU_VELOCITY0)
+		{ newcd.vel0 = *ptr++; CFDIFF(vel0,0,DZ_CD_VELOCITY0_FORCE); }
+	if (mask & SU_PUNCH1)
+		{ newcd.ang1 = *ptr++; CFDIFF(ang1,0,DZ_CD_PUNCH1_FORCE); }
+	if (mask & SU_VELOCITY1)
+		{ newcd.vel1 = *ptr++; CFDIFF(vel1,0,DZ_CD_VELOCITY1_FORCE); }
+	if (mask & SU_PUNCH2)
+		{ newcd.ang2 = *ptr++; CFDIFF(ang2,0,DZ_CD_PUNCH2_FORCE); }
+	if (mask & SU_VELOCITY2)
+		{ newcd.vel2 = *ptr++; CFDIFF(vel2,0,DZ_CD_VELOCITY2_FORCE); }
 	newcd.items = getlong(ptr); ptr += 4;
-	newcd.invbit = !(mask & 0x0200);
-	newcd.uk10 = !!(mask & 0x0400);
-	newcd.uk11 = !!(mask & 0x0800);
-	if (mask & 0x1000) { newcd.wpf = *ptr++; CFDIFF(wpf,0,0x2000); }
-	if (mask & 0x2000) { newcd.av = *ptr++; CFDIFF(av,0,0x4000); }
-	if (mask & 0x4000) { newcd.wpm = *ptr++; CFDIFF(wpm,0,0x8000); }
+	newcd.invbit = !(mask & SU_ITEMS);
+	newcd.uk10 = !!(mask & SU_ONGROUND);
+	newcd.uk11 = !!(mask & SU_INWATER);
+	if (mask & SU_WEAPONFRAME)
+		{ newcd.wpf = *ptr++; CFDIFF(wpf,0,DZ_CD_WEAPONFRAME_FORCE); }
+	if (mask & SU_ARMOR)
+		{ newcd.av = *ptr++; CFDIFF(av,0,DZ_CD_ARMOR_FORCE); }
+	if (mask & SU_WEAPON)
+		{ newcd.wpm = *ptr++; CFDIFF(wpm,0,DZ_CD_WEAPON_FORCE); }
 	newcd.health = getshort(ptr); ptr += 2;
 	newcd.am = *ptr++;
 	newcd.sh = *ptr++;
@@ -130,66 +143,66 @@ int dem_clientdata(void)
 	newcd.wp = *ptr++;
 	discard_msg(ptr-inptr);
 
-	mask = 0x00000040;
+	mask = DZ_IDENTIFIER_CLIENTDATA_DIFF;
 	ptr = buf+4;
 
 	#define CDIFF(x,b) \
 		if (oldcd.x != newcd.x) \
 		{ mask |= b; *ptr++ = bdiff(newcd.x,oldcd.x); }
 
-	CDIFF(vel2,0x00000001);
-	CDIFF(vel0,0x00000002);
-	CDIFF(vel1,0x00000004);
-	CDIFF(wpf,0x00000100);
-	if (oldcd.uk10 != newcd.uk10) mask |= 0x00000200;
-	CDIFF(ang0,0x00000400);
-	CDIFF(am,0x00000800);
+	CDIFF(vel2,DZ_CD_VELOCITY2_DIFF);
+	CDIFF(vel0,DZ_CD_VELOCITY0_DIFF);
+	CDIFF(vel1,DZ_CD_VELOCITY1_DIFF);
+	CDIFF(wpf,DZ_CD_WEAPONFRAME_DIFF);
+	if (oldcd.uk10 != newcd.uk10) mask |= DZ_CD_ONGROUND_DIFF;
+	CDIFF(ang0,DZ_CD_PUNCH0_DIFF);
+	CDIFF(am,DZ_CD_AMMO_DIFF);
 	if (oldcd.health != newcd.health)
 	{
-		mask |= 0x00001000;
+		mask |= DZ_CD_HEALTH_DIFF;
 		tmp = newcd.health - oldcd.health;
 		tmp = cnvlong(tmp);
 		memcpy(ptr,&tmp,2); ptr += 2;
 	}
 	if (oldcd.items != newcd.items)
 	{
-		mask |= 0x00002000;
+		mask |= DZ_CD_ITEMS_DIFF;
 		tmp = newcd.items ^ oldcd.items;
 		tmp = cnvlong(tmp);
 		memcpy(ptr,&tmp,4); ptr += 4;		
 	}
-	CDIFF(av,0x00004000);
-	CDIFF(pax,0x00010000);
-	CDIFF(sh,0x00020000);
-	CDIFF(nl,0x00040000);
-	CDIFF(rk,0x00080000);
-	CDIFF(wpm,0x00100000);
-	CDIFF(wp,0x00200000);
-	if (oldcd.uk11 != newcd.uk11) mask |= 0x00400000;
-	CDIFF(voz,0x01000000);
-	CDIFF(ce,0x02000000);
-	CDIFF(ang1,0x04000000);
-	CDIFF(ang2,0x08000000);
-	if (oldcd.invbit != newcd.invbit) mask |= 0x10000000;
+	CDIFF(av,DZ_CD_ARMOR_DIFF);
+	CDIFF(pax,DZ_CD_IDEALPITCH_DIFF);
+	CDIFF(sh,DZ_CD_SHELLS_DIFF);
+	CDIFF(nl,DZ_CD_NAILS_DIFF);
+	CDIFF(rk,DZ_CD_ROCKETS_DIFF);
+	CDIFF(wpm,DZ_CD_WEAPON_DIFF);
+	CDIFF(wp,DZ_CD_WEAPONINDEX_DIFF);
+	if (oldcd.uk11 != newcd.uk11) mask |= DZ_CD_INWATER_DIFF;
+	CDIFF(voz,DZ_CD_VIEWHEIGHT_DIFF);
+	CDIFF(ce,DZ_CD_CELLS_DIFF);
+	CDIFF(ang1,DZ_CD_PUNCH1_DIFF);
+	CDIFF(ang2,DZ_CD_PUNCH2_DIFF);
+	if (oldcd.invbit != newcd.invbit) mask |= DZ_CD_INVBIT_DIFF;
 
-	if (mask & 0xffffff00) mask |= 0x08;
-	if (mask & 0xffff0000) mask |= 0x8000;
-	if (mask & 0xff000000) mask |= 0x800000;
+	if (mask & 0xffffff00) mask |= DZ_CD_MOREBITS_DIFF;
+	if (mask & 0xffff0000) mask |= DZ_CD_MOREBITS1_DIFF;
+	if (mask & 0xff000000) mask |= DZ_CD_MOREBITS2_DIFF;
 
 	tmp = cnvlong(mask);
 	memcpy(buf,&tmp,4);
-	if (!(mask & 0x08))
+	if (!(mask & DZ_CD_MOREBITS_DIFF))
 		{ memmove(buf+1,buf+4,ptr-buf-4); ptr -= 3; }
-	else if (!(mask & 0x8000))
+	else if (!(mask & DZ_CD_MOREBITS1_DIFF))
 		{ memmove(buf+2,buf+4,ptr-buf-4); ptr -= 2; }
-	else if (!(mask & 0x800000))
+	else if (!(mask & DZ_CD_MOREBITS2_DIFF))
 		{ memmove(buf+3,buf+4,ptr-buf-4); ptr -= 1; }
 	insert_msg(buf,ptr-buf);
 
 	if (newcd.force != oldcd.force)
 	{
-		mask = 0x50 | (newcd.force ^ oldcd.force);
-		if (mask & 0xff00) mask |= 8;
+		mask = DZ_IDENTIFIER_CLIENTDATA_FORCE | (newcd.force ^ oldcd.force);
+		if (mask & 0xff00) mask |= DZ_CD_MOREBITS_FORCE;
 		buf[0] = mask & 0xff;
 		buf[1] = (mask >> 8) & 0xff;
 		insert_msg(buf,1+!!buf[1]);
@@ -225,21 +238,21 @@ int dem_spawnbaseline(void)
 	buf[2] = diff >> 8;
 	ptr = buf+3;
 	*ptr++ = ent.modelindex;
-	if (ent.frame) { buf[2] |= 0x04; *ptr++ = ent.frame; }
-	if (ent.colormap) { buf[2] |= 0x08; *ptr++ = ent.colormap; }
-	if (ent.skin) { buf[2] |= 0x10; *ptr++ = ent.skin; }
+	if (ent.frame) { buf[2] |= DZ_SB_FRAME; *ptr++ = ent.frame; }
+	if (ent.colormap) { buf[2] |= DZ_SB_COLORMAP; *ptr++ = ent.colormap; }
+	if (ent.skin) { buf[2] |= DZ_SB_SKIN; *ptr++ = ent.skin; }
 	if (ent.org0 || ent.org1 || ent.org2)
 	{
 		int tmp;
-		buf[2] |= 0x20;
+		buf[2] |= DZ_SB_ORIGIN;
 		tmp = ent.org0; tmp = cnvlong(tmp); memcpy(ptr,&tmp,2);
 		tmp = ent.org1; tmp = cnvlong(tmp); memcpy(ptr+2,&tmp,2);
 		tmp = ent.org2; tmp = cnvlong(tmp); memcpy(ptr+4,&tmp,2);
 		ptr += 6;
 	}
-	if (ent.ang1) { buf[2] |= 0x40; *ptr++ = ent.ang1; }
+	if (ent.ang1) { buf[2] |= DZ_SB_ANGLE1; *ptr++ = ent.ang1; }
 	if (ent.ang0 || ent.ang2)
-	{	buf[2] |= 0x80; *ptr++ = ent.ang0; *ptr++ = ent.ang2; }
+	{	buf[2] |= DZ_SB_ANGLE0AND2; *ptr++ = ent.ang0; *ptr++ = ent.ang2; }
 	insert_msg(buf,ptr-buf);
 	base[index] = ent;
 	sble = index;
@@ -302,24 +315,24 @@ int dem_copy_ue(void)
 	unsigned short mask = inptr[0] & 0x7f;
 	int len = 1;
 
-	if (mask & 0x0001)
+	if (mask & U_MOREBITS)
 	{
 		mask |= inptr[len++] << 8;
-		if (mask & 0x8000)
+		if (mask & U_TRANS)
 			return 0;
 	}
-	if (mask & 0x4000) len++;	/* entity number */
-	if (mask & 0x0400) len++;	/* model index */
-	if (mask & 0x0040) len++;	/* frame */
-	if (mask & 0x0800) len++;	/* colormap */
-	if (mask & 0x1000) len++;	/* skin */
-	if (mask & 0x2000) len++;	/* effects */
-	if (mask & 0x0002) len += 2;/* origin[0] */
-	if (mask & 0x0100) len++;	/* angles[0] */
-	if (mask & 0x0004) len += 2;/* origin[1] */
-	if (mask & 0x0010) len++;	/* angles[1] */
-	if (mask & 0x0008) len += 2;/* origin[2] */
-	if (mask & 0x0200) len++;	/* angles[2] */
+	if (mask & U_LONGENTITY) len++;	/* entity number */
+	if (mask & U_MODEL) len++;	/* model index */
+	if (mask & U_FRAME) len++;	/* frame */
+	if (mask & U_COLORMAP) len++;	/* colormap */
+	if (mask & U_SKIN) len++;	/* skin */
+	if (mask & U_EFFECTS) len++;	/* effects */
+	if (mask & U_ORIGIN0) len += 2;/* origin[0] */
+	if (mask & U_ANGLE0) len++;	/* angles[0] */
+	if (mask & U_ORIGIN1) len += 2;/* origin[1] */
+	if (mask & U_ANGLE1) len++;	/* angles[1] */
+	if (mask & U_ORIGIN2) len += 2;/* origin[2] */
+	if (mask & U_ANGLE2) len++;	/* angles[2] */
 	copy_msg(len + 1);	// add one more for entity number
 	return 1;
 }
@@ -345,8 +358,8 @@ int dem_updateentity(void)
 		return 0;
 	}
 
-	if (mask & 0x01) mask |= (inptr[len++] << 8);
-	if (mask & 0x4000) {
+	if (mask & U_MOREBITS) mask |= (inptr[len++] << 8);
+	if (mask & U_LONGENTITY) {
 		entity = getshort(inptr+len);
 		len += 2;
 	} else {
@@ -363,39 +376,39 @@ int dem_updateentity(void)
 	lastentity = entity;
 
 	memcpy(newent + entity, base + entity, sizeof(ent_t));
-	if (mask & 0x4000 && entity <= 0xff)
-		newent[entity].force |= 0x400000;
+	if (mask & U_LONGENTITY && entity <= 0xff)
+		newent[entity].force |= DZ_UE_LONGENTITY_FORCE;
 
 	#define FDIFF(x,bit) if (newent[entity].x == base[entity].x) \
 					newent[entity].force |= bit;
-	if (mask & 0x0400)
+	if (mask & U_MODEL)
 	    { newent[entity].modelindex = inptr[len++];
-	      FDIFF(modelindex,0x040000); }
-	if (mask & 0x40)
-	    { newent[entity].frame = inptr[len++]; FDIFF(frame,0x4000); }
-	if (mask & 0x0800)
-	    { newent[entity].colormap=inptr[len++]; FDIFF(colormap,0x080000); }
-	if (mask & 0x1000)
-	    { newent[entity].skin = inptr[len++]; FDIFF(skin,0x100000); }
-	if (mask & 0x2000)
-	    { newent[entity].effects = inptr[len++]; FDIFF(effects,0x200000); }
-	if (mask & 0x02)
+	      FDIFF(modelindex,DZ_UE_MODEL_FORCE); }
+	if (mask & U_FRAME)
+	    { newent[entity].frame = inptr[len++]; FDIFF(frame,DZ_UE_FRAME_FORCE); }
+	if (mask & U_COLORMAP)
+	    { newent[entity].colormap=inptr[len++]; FDIFF(colormap,DZ_UE_COLORMAP_FORCE); }
+	if (mask & U_SKIN)
+	    { newent[entity].skin = inptr[len++]; FDIFF(skin,DZ_UE_SKIN_FORCE); }
+	if (mask & U_EFFECTS)
+	    { newent[entity].effects = inptr[len++]; FDIFF(effects,DZ_UE_EFFECTS_FORCE); }
+	if (mask & U_ORIGIN0)
 	    { newent[entity].org0 = getshort(inptr+len);
-	      len += 2; FDIFF(org0,0x010000); }
-	if (mask & 0x0100)
-	    { newent[entity].ang0 = inptr[len++]; FDIFF(ang0,0x0800); }
-	if (mask & 0x04)
+	      len += 2; FDIFF(org0,DZ_UE_ORIGIN0_FORCE); }
+	if (mask & U_ANGLE0)
+	    { newent[entity].ang0 = inptr[len++]; FDIFF(ang0,DZ_UE_ANGLE0_FORCE); }
+	if (mask & U_ORIGIN1)
 	    { newent[entity].org1 = getshort(inptr+len);
-	      len += 2; FDIFF(org1,0x0400); }
-	if (mask & 0x10)
-	    { newent[entity].ang1 = inptr[len++]; FDIFF(ang1,0x1000); }
-	if (mask & 0x08)
+	      len += 2; FDIFF(org1,DZ_UE_ORIGIN1_FORCE); }
+	if (mask & U_ANGLE1)
+	    { newent[entity].ang1 = inptr[len++]; FDIFF(ang1,DZ_UE_ANGLE1_FORCE); }
+	if (mask & U_ORIGIN2)
 	    { newent[entity].org2 = getshort(inptr+len);
-	      len += 2; FDIFF(org2,0x020000); }
-	if (mask & 0x0200)
-	    { newent[entity].ang2 = inptr[len++]; FDIFF(ang2,0x2000); }
+	      len += 2; FDIFF(org2,DZ_UE_ORIGIN2_FORCE); }
+	if (mask & U_ANGLE2)
+	    { newent[entity].ang2 = inptr[len++]; FDIFF(ang2,DZ_UE_ANGLE2_FORCE); }
 /* nehahra */
-	if (mask & 0x8000)
+	if (mask & U_TRANS)
 	{
 		float tmp = getfloat(inptr + len);
 		directory[numfiles].type = TYPE_NEHAHRA;
@@ -411,9 +424,9 @@ int dem_updateentity(void)
 			len += 4;
 		}
 		else newent[entity].fullbright = 0;
-		newent[entity].force |= 0x800000;
+		newent[entity].force |= DZ_UE_TRANS_FORCE;
 	}
-	newent[entity].newbit = mask & 0x20;
+	newent[entity].newbit = mask & U_NOLERP;
 	newent[entity].present = 1;
 
 	newent[entity].od0 = newent[entity].org0 - oldent[entity].org0;
@@ -470,7 +483,7 @@ void diff_entities(void)
 	int baseval = 0;
 	uchar *tptr = tmpblk;
 
-	buf[0] = 0x30; insert_msg(buf,1);
+	buf[0] = DZ_IDENTIFIER_UPDATEENTITY_DIFF; insert_msg(buf,1);
 
 	for (prev = 0, i = entlink[0]; i < MAX_ENT; i = entlink[i])
 	{
@@ -496,9 +509,9 @@ void diff_entities(void)
 			int diff = n.od2 - o.od2;
 			if (diff >= -128 && diff <= 127)
 			{   if (diff < 0) diff += 256;
-			    mask |= 0x000001; *ptr++ = diff;
+			    mask |= DZ_UE_ORIGIN2_DIFF; *ptr++ = diff;
 			} else {
-			    mask |= 0x000800; tmp = cnvlong(n.org2);
+			    mask |= DZ_UE_ORIGIN2_MOREBITS_DIFF; tmp = cnvlong(n.org2);
 			    memcpy(ptr,&tmp,2); ptr += 2;
 			}
 		}
@@ -507,9 +520,9 @@ void diff_entities(void)
 			int diff = n.od1 - o.od1;
 			if (diff >= -128 && diff <= 127)
 			{   if (diff < 0) diff += 256;
-			    mask |= 0x000002; *ptr++ = diff;
+			    mask |= DZ_UE_ORIGIN1_DIFF; *ptr++ = diff;
 			} else {
-			    mask |= 0x000400; tmp = cnvlong(n.org1);
+			    mask |= DZ_UE_ORIGIN1_MOREBITS_DIFF; tmp = cnvlong(n.org1);
 			    memcpy(ptr,&tmp,2); ptr += 2;
 			}
 		}
@@ -518,32 +531,32 @@ void diff_entities(void)
 			int diff = n.od0 - o.od0;
 			if (diff >= -128 && diff <= 127)
 			{   if (diff < 0) diff += 256;
-			    mask |= 0x000004; *ptr++ = diff;
+			    mask |= DZ_UE_ORIGIN0_DIFF; *ptr++ = diff;
 			} else {
-			    mask |= 0x000200; tmp = cnvlong(n.org0);
+			    mask |= DZ_UE_ORIGIN0_MOREBITS_DIFF; tmp = cnvlong(n.org0);
 			    memcpy(ptr,&tmp,2); ptr += 2;
 			}
 		}
 		if (o.ang0 != n.ang0)
-			{ mask |= 0x000008; *ptr++ = bdiff(n.ang0,o.ang0); }
+			{ mask |= DZ_UE_ANGLE0_DIFF; *ptr++ = bdiff(n.ang0,o.ang0); }
 		if (o.ang1 != n.ang1)
-			{ mask |= 0x000010; *ptr++ = bdiff(n.ang1,o.ang1); }
+			{ mask |= DZ_UE_ANGLE1_DIFF; *ptr++ = bdiff(n.ang1,o.ang1); }
 		if (o.ang2 != n.ang2)
-			{ mask |= 0x000020; *ptr++ = bdiff(n.ang2,o.ang2); }
+			{ mask |= DZ_UE_ANGLE2_DIFF; *ptr++ = bdiff(n.ang2,o.ang2); }
 		if (o.frame != n.frame)
-			{ if (n.frame - o.frame == 1) mask |= 0x000040;
-			  else { mask |= 0x000100;
+			{ if (n.frame - o.frame == 1) mask |= DZ_UE_FRAME_SINGLE_DIFF;
+			  else { mask |= DZ_UE_FRAME_NORMAL_DIFF;
 				 *ptr++ = bdiff(n.frame,o.frame); }
 			}
 		if (o.effects != n.effects)
-			{ mask |= 0x001000; *ptr++ = n.effects; }
+			{ mask |= DZ_UE_EFFECTS_DIFF; *ptr++ = n.effects; }
 		if (o.modelindex != n.modelindex)
-			{ mask |= 0x002000; *ptr++ = n.modelindex; }
-		if (o.newbit != n.newbit) mask |= 0x004000;
+			{ mask |= DZ_UE_MODEL_DIFF; *ptr++ = n.modelindex; }
+		if (o.newbit != n.newbit) mask |= DZ_UE_NOLERP_DIFF;
 		if (o.colormap != n.colormap)
-			{ mask |= 0x010000; *ptr++ = n.colormap; }
+			{ mask |= DZ_UE_COLORMAP_DIFF; *ptr++ = n.colormap; }
 		if (o.skin != n.skin)
-			{ mask |= 0x020000; *ptr++ = n.skin; }
+			{ mask |= DZ_UE_SKIN_DIFF; *ptr++ = n.skin; }
 
 	/* nehahra */
 		if (n.alpha != o.alpha)
@@ -552,14 +565,18 @@ void diff_entities(void)
 			ftmp = getfloat((uchar *)&n.alpha);
 			memcpy(ptr, &ftmp, 4);
 			ptr += 4;
-			mask |= 0x040000;
+			mask |= DZ_UE_NEHAHRA_ALPHA_DIFF;
 		}
 		if (n.fullbright != o.fullbright)
-			{ mask |= 0x080000;	*ptr++ = n.fullbright; }
+			{ mask |= DZ_UE_NEHAHRA_FULLBRIGHT_DIFF; *ptr++ = n.fullbright; }
 
 		if ((mask & 0xffff00) && !(mask & 0x0000ff))
 		{
-			mask |= 0x01;
+			/* sphere: just set something to not have empty first byte? is that
+			   what this is for? seems like it. */
+			static_assert(DZ_UE_ORIGIN2_DIFF == 0x01,
+			              "Need dummy bit to be the first one.");
+			mask |= DZ_UE_ORIGIN2_DIFF;
 			tptr[3] = 0;
 		}
 		else
@@ -567,8 +584,8 @@ void diff_entities(void)
 			memmove(tptr+3,tptr+4,ptr-tptr-4);
 			ptr--;
 		}
-		if (mask & 0xffff00) mask |= 0x80;
-		if (mask & 0xff0000) mask |= 0x8000;
+		if (mask & 0xffff00) mask |= DZ_UE_MOREBITS_DIFF;
+		if (mask & 0xff0000) mask |= DZ_UE_MOREBITS2_DIFF;
 
 		if (!mask)
 		{
@@ -600,11 +617,11 @@ void diff_entities(void)
 		if (firstent < 0)
 		{
 			firstent = i;
-			buf[0] = 0x31;
+			buf[0] = DZ_IDENTIFIER_UPDATEENTITY_FORCE;
 			insert_msg(buf,1);
 		}
 		mask = i | (oldent[i].force ^ newent[i].force);
-		if (mask & 0xff0000) mask |= 0x8000;
+		if (mask & 0xff0000) mask |= DZ_UE_MOREBITS_FORCE;
 		buf[0] = mask & 0xff;
 		buf[1] = (mask >> 8) & 0xff;
 		buf[2] = (mask >> 16) & 0xff;

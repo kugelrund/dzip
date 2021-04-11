@@ -41,8 +41,8 @@ void demx_sound(void)
 	}
 	else
 		len = 11;
-	if (mask & 0x01) len++;
-	if (mask & 0x02) len++;
+	if (mask & SND_VOLUME) len++;
+	if (mask & SND_ATTENUATION) len++;
 
 #ifndef GUI
 	if (dem_decode_type == TYPE_DEMV1) { copy_msg(len); return; }
@@ -152,7 +152,7 @@ void create_clientdata_msg(void)
 {
 	uchar buf[32];
 	uchar *ptr = buf+3;
-	int mask = newcd.invbit? 0 : 0x0200;
+	int mask = newcd.invbit? 0 : SU_ITEMS;
 	long tmp;
 
 	buf[0] = DEM_clientdata;
@@ -160,20 +160,20 @@ void create_clientdata_msg(void)
 	#define CMADD(x,def,bit,bit2) if (newcd.x != def || newcd.force & bit2)\
 		{ mask |= bit; *ptr++ = newcd.x; }
 
-	CMADD(voz,22,0x0001,0x0800);
-	CMADD(pax,0,0x0002,0x1000);
-	CMADD(ang0,0,0x0004,0x0100);
-	CMADD(vel0,0,0x0020,0x0001);
-	CMADD(ang1,0,0x0008,0x0200);
-	CMADD(vel1,0,0x0040,0x0002);
-	CMADD(ang2,0,0x0010,0x0400);
-	CMADD(vel2,0,0x0080,0x0004);
+	CMADD(voz,22,SU_VIEWHEIGHT,DZ_CD_VIEWHEIGHT_FORCE);
+	CMADD(pax,0,SU_IDEALPITCH,DZ_CD_IDEALPITCH_FORCE);
+	CMADD(ang0,0,SU_PUNCH0,DZ_CD_PUNCH0_FORCE);
+	CMADD(vel0,0,SU_VELOCITY0,DZ_CD_VELOCITY0_FORCE);
+	CMADD(ang1,0,SU_PUNCH1,DZ_CD_PUNCH1_FORCE);
+	CMADD(vel1,0,SU_VELOCITY1,DZ_CD_VELOCITY1_FORCE);
+	CMADD(ang2,0,SU_PUNCH2,DZ_CD_PUNCH2_FORCE);
+	CMADD(vel2,0,SU_VELOCITY2,DZ_CD_VELOCITY2_FORCE);
 	tmp = cnvlong(newcd.items); memcpy(ptr,&tmp,4); ptr += 4;
-	if (newcd.uk10) mask |= 0x0400;
-	if (newcd.uk11) mask |= 0x0800;
-	CMADD(wpf,0,0x1000,0x2000);
-	CMADD(av,0,0x2000,0x4000);
-	CMADD(wpm,0,0x4000,0x8000);
+	if (newcd.uk10) mask |= SU_ONGROUND;
+	if (newcd.uk11) mask |= SU_INWATER;
+	CMADD(wpf,0,SU_WEAPONFRAME,DZ_CD_WEAPONFRAME_FORCE);
+	CMADD(av,0,SU_ARMOR,DZ_CD_ARMOR_FORCE);
+	CMADD(wpm,0,SU_WEAPON,DZ_CD_WEAPON_FORCE);
 	tmp = cnvlong(newcd.health); memcpy(ptr,&tmp,2); ptr += 2;
 	*ptr++ = newcd.am;
 	*ptr++ = newcd.sh;
@@ -200,42 +200,42 @@ void demx_clientdata(void)
 #ifndef GUI
 	if (dem_decode_type == TYPE_DEMV1) { demv1_clientdata(); return; }
 #endif
-	if (mask & 0x08) mask += *ptr++ << 8;
-	if (mask & 0x8000) mask += *ptr++ << 16;
-	if (mask & 0x800000) mask += *ptr++ << 24;
+	if (mask & DZ_CD_MOREBITS_DIFF) mask += *ptr++ << 8;
+	if (mask & DZ_CD_MOREBITS1_DIFF) mask += *ptr++ << 16;
+	if (mask & DZ_CD_MOREBITS2_DIFF) mask += *ptr++ << 24;
 
-	CPLUS(vel2,0x00000001);
-	CPLUS(vel0,0x00000002);
-	CPLUS(vel1,0x00000004);
+	CPLUS(vel2,DZ_CD_VELOCITY2_DIFF);
+	CPLUS(vel0,DZ_CD_VELOCITY0_DIFF);
+	CPLUS(vel1,DZ_CD_VELOCITY1_DIFF);
 
-	CPLUS(wpf,0x00000100);
-	if (mask & 0x00000200) newcd.uk10 = !oldcd.uk10;
-	CPLUS(ang0,0x00000400);
-	CPLUS(am,0x00000800);
-	if (mask & 0x00001000) { newcd.health += getshort(ptr); ptr += 2; }
-	if (mask & 0x00002000) { newcd.items ^= getlong(ptr); ptr += 4; }
-	CPLUS(av,0x00004000);
+	CPLUS(wpf,DZ_CD_WEAPONFRAME_DIFF);
+	if (mask & DZ_CD_ONGROUND_DIFF) newcd.uk10 = !oldcd.uk10;
+	CPLUS(ang0,DZ_CD_PUNCH0_DIFF);
+	CPLUS(am,DZ_CD_AMMO_DIFF);
+	if (mask & DZ_CD_HEALTH_DIFF) { newcd.health += getshort(ptr); ptr += 2; }
+	if (mask & DZ_CD_ITEMS_DIFF) { newcd.items ^= getlong(ptr); ptr += 4; }
+	CPLUS(av,DZ_CD_ARMOR_DIFF);
 
-	CPLUS(pax,0x00010000);
-	CPLUS(sh,0x00020000);
-	CPLUS(nl,0x00040000);
-	CPLUS(rk,0x00080000);
-	CPLUS(wpm,0x00100000);
-	CPLUS(wp,0x00200000);
-	if (mask & 0x00400000) newcd.uk11 = !oldcd.uk11;
+	CPLUS(pax,DZ_CD_IDEALPITCH_DIFF);
+	CPLUS(sh,DZ_CD_SHELLS_DIFF);
+	CPLUS(nl,DZ_CD_NAILS_DIFF);
+	CPLUS(rk,DZ_CD_ROCKETS_DIFF);
+	CPLUS(wpm,DZ_CD_WEAPON_DIFF);
+	CPLUS(wp,DZ_CD_WEAPONINDEX_DIFF);
+	if (mask & DZ_CD_INWATER_DIFF) newcd.uk11 = !oldcd.uk11;
 
-	CPLUS(voz,0x01000000);
-	CPLUS(ce,0x02000000);
-	CPLUS(ang1,0x04000000);
-	CPLUS(ang2,0x08000000);
-	if (mask & 0x10000000) newcd.invbit = !oldcd.invbit;
+	CPLUS(voz,DZ_CD_VIEWHEIGHT_DIFF);
+	CPLUS(ce,DZ_CD_CELLS_DIFF);
+	CPLUS(ang1,DZ_CD_PUNCH1_DIFF);
+	CPLUS(ang2,DZ_CD_PUNCH2_DIFF);
+	if (mask & DZ_CD_INVBIT_DIFF) newcd.invbit = !oldcd.invbit;
 
 	discard_msg(ptr-inptr);
 
-	if ((*ptr & 0xf0) == 0x50)
+	if ((*ptr & 0xf0) == DZ_IDENTIFIER_CLIENTDATA_FORCE)
 	{
 		mask = *ptr++;
-		if (mask & 0x08) mask |= *ptr++ << 8;
+		if (mask & DZ_CD_MOREBITS_FORCE) mask |= *ptr++ << 8;
 		newcd.force ^= mask & 0xff07;
 		discard_msg(ptr-inptr);
 	}
@@ -280,19 +280,20 @@ void demx_spawnbaseline(void)
 	int mask = getshort(inptr+1);
 	
 	sble = (sble + (mask & 0x03ff)) % 0x400;
+	mask = mask >> 8;
 	memset(&ent,0,sizeof(ent_t));
 	ent.modelindex = *ptr++;
-	if (mask & 0x0400) ent.frame = *ptr++;
-	if (mask & 0x0800) ent.colormap = *ptr++;
-	if (mask & 0x1000) ent.skin = *ptr++;
-	if (mask & 0x2000)
+	if (mask & DZ_SB_FRAME) ent.frame = *ptr++;
+	if (mask & DZ_SB_COLORMAP) ent.colormap = *ptr++;
+	if (mask & DZ_SB_SKIN) ent.skin = *ptr++;
+	if (mask & DZ_SB_ORIGIN)
 	{
 		ent.org0 = getshort(ptr); ptr += 2;
 		ent.org1 = getshort(ptr); ptr += 2;
 		ent.org2 = getshort(ptr); ptr += 2;
 	}
-	if (mask & 0x4000) ent.ang1 = *ptr++;
-	if (mask & 0x8000) { ent.ang0 = *ptr++; ent.ang2 = *ptr++; }
+	if (mask & DZ_SB_ANGLE1) ent.ang1 = *ptr++;
+	if (mask & DZ_SB_ANGLE0AND2) { ent.ang0 = *ptr++; ent.ang2 = *ptr++; }
 	discard_msg(ptr-inptr);
 
 	buf[0] = DEM_spawnbaseline;
@@ -409,7 +410,7 @@ void demx_updateentity(void)
 
 		mask = *ptr++;
 
-		if (mask == 0x80)
+		if (mask == DZ_UE_MOREBITS_DIFF)
 		{
 			oldent[i] = newent[i] = base[i];
 			entlink[prev] = entlink[i];
@@ -420,51 +421,51 @@ void demx_updateentity(void)
 
 		if (mask == 0x00) { newent[i].active = 0; continue; }
 
-		if (mask & 0x80) mask += (*ptr++) << 8;
-		if (mask & 0x8000) mask += (*ptr++) << 16;
+		if (mask & DZ_UE_MOREBITS_DIFF) mask += (*ptr++) << 8;
+		if (mask & DZ_UE_MOREBITS2_DIFF) mask += (*ptr++) << 16;
 
 		n = newent[i];
 		o = oldent[i];
 
-		if (mask & 0x000001) { n.od2 = bplus(*ptr++,o.od2);
-				       n.org2 = o.org2 + n.od2; }
-		if (mask & 0x000800) { n.org2 = getshort(ptr); ptr += 2;
-				       n.od2 = n.org2 - o.org2; }
-		if (mask & 0x000002) { n.od1 = bplus(*ptr++,o.od1);
-				       n.org1 = o.org1 + n.od1; }
-		if (mask & 0x000400) { n.org1 = getshort(ptr); ptr += 2;
-				       n.od1 = n.org1 - o.org1; }
-		if (mask & 0x000004) { n.od0 = bplus(*ptr++,o.od0);
-				       n.org0 = o.org0 + n.od0; }
-		if (mask & 0x000200) { n.org0 = getshort(ptr); ptr += 2;
-				       n.od0 = n.org0 - o.org0; }
+		if (mask & DZ_UE_ORIGIN2_DIFF)
+			{ n.od2 = bplus(*ptr++,o.od2); n.org2 = o.org2 + n.od2; }
+		if (mask & DZ_UE_ORIGIN2_MOREBITS_DIFF)
+			{ n.org2 = getshort(ptr); ptr += 2; n.od2 = n.org2 - o.org2; }
+		if (mask & DZ_UE_ORIGIN1_DIFF)
+			{ n.od1 = bplus(*ptr++,o.od1); n.org1 = o.org1 + n.od1; }
+		if (mask & DZ_UE_ORIGIN1_MOREBITS_DIFF)
+			{ n.org1 = getshort(ptr); ptr += 2; n.od1 = n.org1 - o.org1; }
+		if (mask & DZ_UE_ORIGIN0_DIFF)
+			{ n.od0 = bplus(*ptr++,o.od0); n.org0 = o.org0 + n.od0; }
+		if (mask & DZ_UE_ORIGIN0_MOREBITS_DIFF)
+			{ n.org0 = getshort(ptr); ptr += 2; n.od0 = n.org0 - o.org0; }
 
-		if (mask & 0x000008) n.ang0 = bplus(*ptr++,o.ang0);
-		if (mask & 0x000010) n.ang1 = bplus(*ptr++,o.ang1);
-		if (mask & 0x000020) n.ang2 = bplus(*ptr++,o.ang2);
-		if (mask & 0x000040) n.frame = o.frame+1;
-		if (mask & 0x000100) n.frame = bplus(*ptr++,o.frame);
+		if (mask & DZ_UE_ANGLE0_DIFF) n.ang0 = bplus(*ptr++,o.ang0);
+		if (mask & DZ_UE_ANGLE1_DIFF) n.ang1 = bplus(*ptr++,o.ang1);
+		if (mask & DZ_UE_ANGLE2_DIFF) n.ang2 = bplus(*ptr++,o.ang2);
+		if (mask & DZ_UE_FRAME_SINGLE_DIFF) n.frame = o.frame+1;
+		if (mask & DZ_UE_FRAME_NORMAL_DIFF) n.frame = bplus(*ptr++,o.frame);
 
-		if (mask & 0x001000) n.effects = *ptr++;
-		if (mask & 0x002000) n.modelindex = *ptr++;
-		if (mask & 0x004000) n.newbit = !o.newbit;
-		if (mask & 0x010000) n.colormap = *ptr++;
-		if (mask & 0x020000) n.skin = *ptr++;
+		if (mask & DZ_UE_EFFECTS_DIFF) n.effects = *ptr++;
+		if (mask & DZ_UE_MODEL_DIFF) n.modelindex = *ptr++;
+		if (mask & DZ_UE_NOLERP_DIFF) n.newbit = !o.newbit;
+		if (mask & DZ_UE_COLORMAP_DIFF) n.colormap = *ptr++;
+		if (mask & DZ_UE_SKIN_DIFF) n.skin = *ptr++;
 	/* nehahra */
-		if (mask & 0x040000) { n.alpha = getfloat(ptr); ptr += 4; }
-		if (mask & 0x080000) n.fullbright = *ptr++;
+		if (mask & DZ_UE_NEHAHRA_ALPHA_DIFF) { n.alpha = getfloat(ptr); ptr += 4; }
+		if (mask & DZ_UE_NEHAHRA_FULLBRIGHT_DIFF) n.fullbright = *ptr++;
 
 		newent[i] = n;
 	}
 
-	if (*ptr == 0x31)
+	if (*ptr == DZ_IDENTIFIER_UPDATEENTITY_FORCE)
 	{
 		ptr++;
 		while ((mask = getshort(ptr)))
 		{
 			ptr += 2;
 			mask &= 0xffff;
-			if (mask & 0x8000) mask |= *ptr++ << 16;
+			if (mask & DZ_UE_MOREBITS_FORCE) mask |= *ptr++ << 16;
 			entity = mask & 0x3ff;
 			newent[entity].force ^= mask & 0xfffc00;
 		}
@@ -478,14 +479,14 @@ void demx_updateentity(void)
 		ent_t n = newent[i], b = base[i];
 
 		ptr = buf+2;
-		mask = 0x80;
+		mask = U_SIGNAL;
 
-		if (i > 0xff || (n.force & 0x400000))
+		if (i > 0xff || (n.force & DZ_UE_LONGENTITY_FORCE))
 		{
 			tmp = cnvlong(i);
 			memcpy(ptr,&tmp,2);
 			ptr += 2;
-			mask |= 0x4000;
+			mask |= U_LONGENTITY;
 		}
 		else
 			*ptr++ = i;
@@ -494,25 +495,25 @@ void demx_updateentity(void)
 			if (n.x != b.x || n.force & bit2) \
 				{ *ptr++ = n.x; mask |= bit; }
 
-		BDIFF(modelindex,0x0400,0x040000);
-		BDIFF(frame,0x0040,0x4000);
-		BDIFF(colormap,0x0800,0x080000);
-		BDIFF(skin,0x1000,0x100000);
-		BDIFF(effects,0x2000,0x200000);
-		if (n.org0 != b.org0 || n.force & 0x010000)
-		    { mask |= 0x0002; tmp = cnvlong(n.org0); 
+		BDIFF(modelindex,U_MODEL,DZ_UE_MODEL_FORCE);
+		BDIFF(frame,U_FRAME,DZ_UE_FRAME_FORCE);
+		BDIFF(colormap,U_COLORMAP,DZ_UE_COLORMAP_FORCE);
+		BDIFF(skin,U_SKIN,DZ_UE_SKIN_FORCE);
+		BDIFF(effects,U_EFFECTS,DZ_UE_EFFECTS_FORCE);
+		if (n.org0 != b.org0 || n.force & DZ_UE_ORIGIN0_FORCE)
+		    { mask |= U_ORIGIN0; tmp = cnvlong(n.org0);
 		      memcpy(ptr,&tmp,2); ptr += 2; }
-		BDIFF(ang0,0x0100,0x0800);
-		if (n.org1 != b.org1 || n.force & 0x0400)
-		    { mask |= 0x0004; tmp = cnvlong(n.org1); 
+		BDIFF(ang0,U_ANGLE0,DZ_UE_ANGLE0_FORCE);
+		if (n.org1 != b.org1 || n.force & DZ_UE_ORIGIN1_FORCE)
+		    { mask |= U_ORIGIN1; tmp = cnvlong(n.org1);
 		      memcpy(ptr,&tmp,2); ptr += 2; }
-		BDIFF(ang1,0x0010,0x1000);
-		if (n.org2 != b.org2 || n.force & 0x020000)
-		    { mask |= 0x0008; tmp = cnvlong(n.org2); 
+		BDIFF(ang1,U_ANGLE1,DZ_UE_ANGLE1_FORCE);
+		if (n.org2 != b.org2 || n.force & DZ_UE_ORIGIN2_FORCE)
+		    { mask |= U_ORIGIN2; tmp = cnvlong(n.org2);
 		      memcpy(ptr,&tmp,2); ptr += 2; }
-		BDIFF(ang2,0x0200,0x2000);
+		BDIFF(ang2,U_ANGLE2,DZ_UE_ANGLE2_FORCE);
 /* nehahra */
-		if (n.force & 0x800000)
+		if (n.force & DZ_UE_TRANS_FORCE)
 		{
 			float f = 1;
 
@@ -533,14 +534,14 @@ void demx_updateentity(void)
 				memcpy(ptr, &tmp, 4);
 				ptr += 4;
 			}
-			mask |= 0x8000;
+			mask |= U_TRANS;
 		}
 		
-		if (n.newbit) mask |= 0x20;
-		if (mask & 0xff00) mask |= 0x01;
+		if (n.newbit) mask |= U_NOLERP;
+		if (mask & 0xff00) mask |= U_MOREBITS;
 		buf[0] = mask & 0xff;
 		buf[1] = (mask & 0xff00) >> 8;
-		if (!(mask & 0x01)) { memmove(buf+1,buf+2,ptr-buf-2); ptr--; }
+		if (!(mask & U_MOREBITS)) { memmove(buf+1,buf+2,ptr-buf-2); ptr--; }
 		insert_msg(buf,ptr-buf);
 
 		oldent[i] = newent[i];
@@ -584,10 +585,11 @@ uInt dem_uncompress_block(void)
 	long a1;
 	uchar cfields;
 #ifdef GUI
-	int uemask = 0x30, cdmask = 0x40;
+	int uemask = DZ_IDENTIFIER_UPDATEENTITY_DIFF;
+	int cdmask = DZ_IDENTIFIER_CLIENTDATA_DIFF;
 #else
-	int uemask = (dem_decode_type == TYPE_DEMV1)? 0x80 : 0x30;
-	int cdmask = (dem_decode_type == TYPE_DEMV1)? 0xf0 : 0x40;
+	int uemask = (dem_decode_type == TYPE_DEMV1)? 0x80 : DZ_IDENTIFIER_UPDATEENTITY_DIFF;
+	int cdmask = (dem_decode_type == TYPE_DEMV1)? 0xf0 : DZ_IDENTIFIER_CLIENTDATA_DIFF;
 #endif
 	cfields = *inptr++;
 
@@ -616,7 +618,7 @@ uInt dem_uncompress_block(void)
 				demx_message[*inptr - 1]();
 			else if ((*inptr & 0xf0) == cdmask) 
 				demx_clientdata();
-			else if ((*inptr & 0xf8) == 0x38)
+			else if ((*inptr & 0xf8) == DZ_IDENTIFIER_SOUND)
 				demx_sound();
 			else if (*inptr >= 0x80)
 			{

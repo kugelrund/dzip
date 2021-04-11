@@ -88,7 +88,7 @@ void demv1_updateentity(void)
 		{
 			ptr += 2;
 			mask &= 0xffff;
-			if (mask & 0x8000) mask |= *ptr++ << 16;
+			if (mask & DZ_UE_MOREBITS_FORCE) mask |= *ptr++ << 16;
 			entity = mask & 0x3ff;
 			if (entity > maxent) maxent = entity;
 			newent[entity].force ^= mask & 0xfffc00;
@@ -156,14 +156,14 @@ void demv1_dxentities(void)
 
 		if (!n.present) continue;
 		ptr = buf+2;
-		mask = 0x80;
+		mask = U_SIGNAL;
 
-		if (i > 0xff || (n.force & 0x400000))
+		if (i > 0xff || (n.force & DZ_UE_LONGENTITY_FORCE))
 		{
 			tmp = cnvlong(i);
 			memcpy(ptr,&tmp,2);
 			ptr += 2;
-			mask |= 0x4000;
+			mask |= U_LONGENTITY;
 		}
 		else
 			*ptr++ = i;
@@ -172,29 +172,29 @@ void demv1_dxentities(void)
 			if (n.x != b.x || n.force & bit2) \
 				{ *ptr++ = n.x; mask |= bit; }
 
-		BDIFF(modelindex,0x0400,0x040000);
-		BDIFF(frame,0x0040,0x4000);
-		BDIFF(colormap,0x0800,0x080000);
-		BDIFF(skin,0x1000,0x100000);
-		BDIFF(effects,0x2000,0x200000);
-		if (n.org0 != b.org0 || n.force & 0x010000)
-		    { mask |= 0x0002; tmp = cnvlong(n.org0); 
+		BDIFF(modelindex,U_MODEL,DZ_UE_MODEL_FORCE);
+		BDIFF(frame,U_FRAME,DZ_UE_FRAME_FORCE);
+		BDIFF(colormap,U_COLORMAP,DZ_UE_COLORMAP_FORCE);
+		BDIFF(skin,U_SKIN,DZ_UE_SKIN_FORCE);
+		BDIFF(effects,U_EFFECTS,DZ_UE_EFFECTS_FORCE);
+		if (n.org0 != b.org0 || n.force & DZ_UE_ORIGIN0_FORCE)
+		    { mask |= U_ORIGIN0; tmp = cnvlong(n.org0);
 		      memcpy(ptr,&tmp,2); ptr += 2; }
-		BDIFF(ang0,0x0100,0x0800);
-		if (n.org1 != b.org1 || n.force & 0x0400)
-		    { mask |= 0x0004; tmp = cnvlong(n.org1); 
+		BDIFF(ang0,U_ANGLE0,DZ_UE_ANGLE0_FORCE);
+		if (n.org1 != b.org1 || n.force & DZ_UE_ORIGIN1_FORCE)
+		    { mask |= U_ORIGIN1; tmp = cnvlong(n.org1);
 		      memcpy(ptr,&tmp,2); ptr += 2; }
-		BDIFF(ang1,0x0010,0x1000);
-		if (n.org2 != b.org2 || n.force & 0x020000)
-		    { mask |= 0x0008; tmp = cnvlong(n.org2); 
+		BDIFF(ang1,U_ANGLE1,DZ_UE_ANGLE1_FORCE);
+		if (n.org2 != b.org2 || n.force & DZ_UE_ORIGIN2_FORCE)
+		    { mask |= U_ORIGIN2; tmp = cnvlong(n.org2);
 		      memcpy(ptr,&tmp,2); ptr += 2; }
-		BDIFF(ang2,0x0200,0x2000);
-		if (n.newbit) mask |= 0x20;
+		BDIFF(ang2,U_ANGLE2,DZ_UE_ANGLE2_FORCE);
+		if (n.newbit) mask |= U_NOLERP;
 
-		if (mask & 0xff00) mask |= 0x01;
+		if (mask & 0xff00) mask |= U_MOREBITS;
 		buf[0] = mask & 0xff;
 		buf[1] = (mask & 0xff00) >> 8;
-		if (!(mask & 0x01)) { memmove(buf+1,buf+2,ptr-buf-2); ptr--; }
+		if (!(mask & U_MOREBITS)) { memmove(buf+1,buf+2,ptr-buf-2); ptr--; }
 		insert_msg(buf,ptr-buf);
 		memcpy(oldent+i,newent+i,sizeof(ent_t));
 	}
