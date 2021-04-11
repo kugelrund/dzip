@@ -328,8 +328,7 @@ void diff_entities(void);
 
 int dem_updateentity(void)
 {
-	uchar mask = *inptr & 0x7f;
-	uchar topmask;
+	uint16_t mask = *inptr & 0x7f;
 	short entity;
 	static short lastentity;
 	int len = 1;
@@ -346,8 +345,8 @@ int dem_updateentity(void)
 		return 0;
 	}
 
-	topmask = (mask & 0x01)? inptr[len++] : 0;
-	if (topmask & 0x40) {
+	if (mask & 0x01) mask |= (inptr[len++] << 8);
+	if (mask & 0x4000) {
 		entity = getshort(inptr+len);
 		len += 2;
 	} else {
@@ -364,26 +363,26 @@ int dem_updateentity(void)
 	lastentity = entity;
 
 	memcpy(newent + entity, base + entity, sizeof(ent_t));
-	if (topmask & 0x40 && entity <= 0xff)
+	if (mask & 0x4000 && entity <= 0xff)
 		newent[entity].force |= 0x400000;
 
 	#define FDIFF(x,bit) if (newent[entity].x == base[entity].x) \
 					newent[entity].force |= bit;
-	if (topmask & 0x04)
+	if (mask & 0x0400)
 	    { newent[entity].modelindex = inptr[len++];
 	      FDIFF(modelindex,0x040000); }
 	if (mask & 0x40)
 	    { newent[entity].frame = inptr[len++]; FDIFF(frame,0x4000); }
-	if (topmask & 0x08)
+	if (mask & 0x0800)
 	    { newent[entity].colormap=inptr[len++]; FDIFF(colormap,0x080000); }
-	if (topmask & 0x10)
+	if (mask & 0x1000)
 	    { newent[entity].skin = inptr[len++]; FDIFF(skin,0x100000); }
-	if (topmask & 0x20)
+	if (mask & 0x2000)
 	    { newent[entity].effects = inptr[len++]; FDIFF(effects,0x200000); }
 	if (mask & 0x02)
 	    { newent[entity].org0 = getshort(inptr+len);
 	      len += 2; FDIFF(org0,0x010000); }
-	if (topmask & 0x01)
+	if (mask & 0x0100)
 	    { newent[entity].ang0 = inptr[len++]; FDIFF(ang0,0x0800); }
 	if (mask & 0x04)
 	    { newent[entity].org1 = getshort(inptr+len);
@@ -393,10 +392,10 @@ int dem_updateentity(void)
 	if (mask & 0x08)
 	    { newent[entity].org2 = getshort(inptr+len);
 	      len += 2; FDIFF(org2,0x020000); }
-	if (topmask & 0x02)
+	if (mask & 0x0200)
 	    { newent[entity].ang2 = inptr[len++]; FDIFF(ang2,0x2000); }
 /* nehahra */
-	if (topmask & 0x80)
+	if (mask & 0x8000)
 	{
 		float tmp = getfloat(inptr + len);
 		directory[numfiles].type = TYPE_NEHAHRA;
