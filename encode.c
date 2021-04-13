@@ -5,31 +5,58 @@
 int dem_sound(void)
 {
 	uchar mask = inptr[1];
-	int len = 11;
 	uInt chanent, c, entity;
+	uchar *ptr = inptr + 2;
 
-	if (mask & SND_VOLUME) len++;
-	if (mask & SND_ATTENUATION) len++;
+	if (mask & SND_VOLUME) ptr++;
+	if (mask & SND_ATTENUATION) ptr++;
+	if (mask & (SND_LARGESOUND|SND_LARGEENTITY))
+	{
+		/* old way of combining identifier 0x38 with mask does not work with
+		   SND_LARGEENTITY and SND_LARGESOUND as it overlaps on the 4th bit.
+		   Instead use a new identifier and negate the bit for those two new
+		   messages. */
+		static_assert(
+			!(DZ_IDENTIFIER_SOUND_MOREBITS & (SND_LARGEENTITY|SND_LARGESOUND)),
+			"New sound identifier is overlapping with new sound bitflags.");
+		inptr[1] = DZ_IDENTIFIER_SOUND_MOREBITS+(mask&0x07);
+		if (!(mask & SND_LARGEENTITY)) inptr[1] |= SND_LARGEENTITY;
+		if (!(mask & SND_LARGESOUND)) inptr[1] |= SND_LARGESOUND;
+	}
+	else
+	{
+		assert(!(mask & DZ_IDENTIFIER_SOUND));
+		inptr[1] = DZ_IDENTIFIER_SOUND+mask;
+	}
 
-	inptr[1] = DZ_IDENTIFIER_SOUND+mask;
-	chanent = getshort(inptr+len-9) & 0xffff;
-	entity = chanent >> 3;
-	chanent = (entity << 3) | ((2-(chanent & 0x07)) & 0x07);
+	if (mask & SND_LARGEENTITY)
+	{
+		entity = getshort(ptr); ptr += 2;
+		chanent = *ptr++;
+	}
+	else
+	{
+		chanent = getshort(ptr) & 0xffff;
+		entity = chanent >> 3;
+		chanent = (entity << 3) | ((2-(chanent & 0x07)) & 0x07);
+		chanent = cnvlong(chanent);
+		memcpy(ptr,&chanent,2);
+		ptr += 2;
+	}
+	if (mask & SND_LARGESOUND) { ptr += 2; } else { ++ptr; }
 
 	if (entity < MAX_ENT)
 	{
-		c = getshort(inptr+len-6) - oldent[entity].org0;
-		c = cnvlong(c); memcpy(inptr+len-6,&c,2);
-		c = getshort(inptr+len-4) - oldent[entity].org1;
-		c = cnvlong(c); memcpy(inptr+len-4,&c,2);
-		c = getshort(inptr+len-2) - oldent[entity].org2;
-		c = cnvlong(c); memcpy(inptr+len-2,&c,2);
+		c = getshort(ptr) - oldent[entity].org0;
+		c = cnvlong(c); memcpy(ptr,&c,2); ptr += 2;
+		c = getshort(ptr) - oldent[entity].org1;
+		c = cnvlong(c); memcpy(ptr,&c,2); ptr += 2;
+		c = getshort(ptr) - oldent[entity].org2;
+		c = cnvlong(c); memcpy(ptr,&c,2); ptr += 2;
 	}
 
-	chanent = cnvlong(chanent);
-	memcpy(inptr+len-9,&chanent,2);
 	discard_msg(1);
-	copy_msg(len-1);
+	copy_msg(ptr-inptr);
 	return 0;
 }
 
@@ -53,10 +80,26 @@ int dem_string(void)
 	return 0;
 }
 
+static uint32_t protocol = PROTOCOL_NETQUAKE;
 int dem_serverinfo(void)
 {
-	uchar *ptr = inptr + 7;
+	uchar *ptr = inptr + 1;
 	uchar *start_ptr;
+
+	protocol = getlong(ptr);
+	ptr += sizeof(protocol);
+	if (protocol == PROTOCOL_RMQ)
+	{
+		fprintf(stderr,"\nwarning: PROTOCOL_RMQ (999) is not supported yet.\n");
+		return 1;
+	}
+	else if (protocol != PROTOCOL_NETQUAKE && protocol != PROTOCOL_FITZQUAKE)
+	{
+		fprintf(stderr,"\nwarning: unknown protocol %u\n",protocol);
+		return 1;
+	}
+	ptr++;  /* maxclients */
+	ptr++;  /* deathmatch */
 
 	while (*ptr++);
 	do {
@@ -99,14 +142,21 @@ int dem_clientdata(void)
 {
 	uchar buf[32];
 	uchar *ptr = inptr+3;
-	uInt mask = getshort(inptr+1);
+	uint64_t mask = (uint16_t)getshort(inptr+1);
+	uint64_t mask_out;
 	long tmp;
+
+	if (mask & SU_EXTEND1) mask |= (uint64_t)*ptr++ << 16;
+	if (mask & SU_EXTEND2) mask |= (uint64_t)*ptr++ << 24;
 
 	memset(&newcd,0,sizeof(cdata_t));
 	newcd.voz = 22;
 	newcd.items = 0x4001;
 
 	#define CFDIFF(x,def,bit) if (newcd.x == def) newcd.force |= bit;
+	#define CFDIFF_2BYTES_LO(x,def,bit) \
+		static_assert((def >> 8) == 0, "Expected 1 byte for default value."); \
+		if ((newcd.x & 0xff) == def) newcd.force |= bit;
 
 	if (mask & SU_VIEWHEIGHT)
 		{ newcd.voz = *ptr++; CFDIFF(voz,22,DZ_CD_VIEWHEIGHT_FORCE); }
@@ -129,11 +179,11 @@ int dem_clientdata(void)
 	newcd.uk10 = !!(mask & SU_ONGROUND);
 	newcd.uk11 = !!(mask & SU_INWATER);
 	if (mask & SU_WEAPONFRAME)
-		{ newcd.wpf = *ptr++; CFDIFF(wpf,0,DZ_CD_WEAPONFRAME_FORCE); }
+		{ newcd.wpf = *ptr++; CFDIFF_2BYTES_LO(wpf,0,DZ_CD_WEAPONFRAME_FORCE); }
 	if (mask & SU_ARMOR)
-		{ newcd.av = *ptr++; CFDIFF(av,0,DZ_CD_ARMOR_FORCE); }
+		{ newcd.av = *ptr++; CFDIFF_2BYTES_LO(av,0,DZ_CD_ARMOR_FORCE); }
 	if (mask & SU_WEAPON)
-		{ newcd.wpm = *ptr++; CFDIFF(wpm,0,DZ_CD_WEAPON_FORCE); }
+		{ newcd.wpm = *ptr++; CFDIFF_2BYTES_LO(wpm,0,DZ_CD_WEAPON_FORCE); }
 	newcd.health = getshort(ptr); ptr += 2;
 	newcd.am = *ptr++;
 	newcd.sh = *ptr++;
@@ -141,22 +191,52 @@ int dem_clientdata(void)
 	newcd.rk = *ptr++;
 	newcd.ce = *ptr++;
 	newcd.wp = *ptr++;
+	if (mask & SU_WEAPON2)
+		{ newcd.wpm |= *ptr++ << 8; if ((newcd.wpm >> 8) == 0) return 1; }
+	if (mask & SU_ARMOR2)
+		{ newcd.av |= *ptr++ << 8; if ((newcd.av >> 8) == 0) return 1; }
+	if (mask & SU_AMMO2) { newcd.am |= *ptr++ << 8; }
+	if (mask & SU_SHELLS2) { newcd.sh |= *ptr++ << 8; }
+	if (mask & SU_NAILS2) { newcd.nl |= *ptr++ << 8; }
+	if (mask & SU_ROCKETS2) { newcd.rk |= *ptr++ << 8; }
+	if (mask & SU_CELLS2) { newcd.ce |= *ptr++ << 8; }
+	if (mask & SU_WEAPONFRAME2)
+		{ newcd.wpf |= *ptr++ << 8; if ((newcd.wpf >> 8) == 0) return 1; }
+	if (mask & SU_WEAPONALPHA)
+		{ newcd.weaponalpha |= *ptr++ << 8;
+		  if (newcd.weaponalpha == oldcd.weaponalpha) return 1; }
 	discard_msg(ptr-inptr);
 
 	mask = DZ_IDENTIFIER_CLIENTDATA_DIFF;
-	ptr = buf+4;
+	ptr = buf+5;
 
 	#define CDIFF(x,b) \
 		if (oldcd.x != newcd.x) \
 		{ mask |= b; *ptr++ = bdiff(newcd.x,oldcd.x); }
+	#define CDIFF_2BYTES(x,b,b_2bytes) \
+		static_assert(sizeof(oldcd.x) == 2, "Expected 2 bytes for member."); \
+		if (oldcd.x != newcd.x) \
+		{ \
+			int diff = newcd.x - oldcd.x; \
+			if ((newcd.x >= 0 && newcd.x <= UINT8_MAX && \
+			     oldcd.x >= 0 && oldcd.x <= UINT8_MAX) || \
+			    (diff >= INT8_MIN && diff <= INT8_MAX && \
+			     !(oldcd.x <= UINT8_MAX && newcd.x > UINT8_MAX))) \
+			{	if (diff < 0) diff += UINT8_MAX + 1; \
+				mask |= b; *ptr++ = diff; \
+			} else { \
+				mask |= b_2bytes; tmp = cnvlong(newcd.x); \
+				memcpy(ptr,&tmp,2); ptr += 2; \
+			} \
+		}
 
 	CDIFF(vel2,DZ_CD_VELOCITY2_DIFF);
 	CDIFF(vel0,DZ_CD_VELOCITY0_DIFF);
 	CDIFF(vel1,DZ_CD_VELOCITY1_DIFF);
-	CDIFF(wpf,DZ_CD_WEAPONFRAME_DIFF);
+	CDIFF_2BYTES(wpf,DZ_CD_WEAPONFRAME_DIFF,DZ_CD_WEAPONFRAME2_DIFF);
 	if (oldcd.uk10 != newcd.uk10) mask |= DZ_CD_ONGROUND_DIFF;
 	CDIFF(ang0,DZ_CD_PUNCH0_DIFF);
-	CDIFF(am,DZ_CD_AMMO_DIFF);
+	CDIFF_2BYTES(am,DZ_CD_AMMO_DIFF,DZ_CD_AMMO2_DIFF);
 	if (oldcd.health != newcd.health)
 	{
 		mask |= DZ_CD_HEALTH_DIFF;
@@ -171,32 +251,36 @@ int dem_clientdata(void)
 		tmp = cnvlong(tmp);
 		memcpy(ptr,&tmp,4); ptr += 4;		
 	}
-	CDIFF(av,DZ_CD_ARMOR_DIFF);
+	CDIFF_2BYTES(av,DZ_CD_ARMOR_DIFF,DZ_CD_ARMOR2_DIFF);
 	CDIFF(pax,DZ_CD_IDEALPITCH_DIFF);
-	CDIFF(sh,DZ_CD_SHELLS_DIFF);
-	CDIFF(nl,DZ_CD_NAILS_DIFF);
-	CDIFF(rk,DZ_CD_ROCKETS_DIFF);
-	CDIFF(wpm,DZ_CD_WEAPON_DIFF);
+	CDIFF_2BYTES(sh,DZ_CD_SHELLS_DIFF,DZ_CD_SHELLS2_DIFF);
+	CDIFF_2BYTES(nl,DZ_CD_NAILS_DIFF,DZ_CD_NAILS2_DIFF);
+	CDIFF_2BYTES(rk,DZ_CD_ROCKETS_DIFF,DZ_CD_ROCKETS2_DIFF);
+	CDIFF_2BYTES(wpm,DZ_CD_WEAPON_DIFF,DZ_CD_WEAPON2_DIFF);
 	CDIFF(wp,DZ_CD_WEAPONINDEX_DIFF);
 	if (oldcd.uk11 != newcd.uk11) mask |= DZ_CD_INWATER_DIFF;
 	CDIFF(voz,DZ_CD_VIEWHEIGHT_DIFF);
-	CDIFF(ce,DZ_CD_CELLS_DIFF);
+	CDIFF_2BYTES(ce,DZ_CD_CELLS_DIFF,DZ_CD_CELLS2_DIFF);
 	CDIFF(ang1,DZ_CD_PUNCH1_DIFF);
 	CDIFF(ang2,DZ_CD_PUNCH2_DIFF);
 	if (oldcd.invbit != newcd.invbit) mask |= DZ_CD_INVBIT_DIFF;
+	CDIFF(weaponalpha,DZ_CD_WEAPONALPHA_DIFF);
 
-	if (mask & 0xffffff00) mask |= DZ_CD_MOREBITS_DIFF;
-	if (mask & 0xffff0000) mask |= DZ_CD_MOREBITS1_DIFF;
-	if (mask & 0xff000000) mask |= DZ_CD_MOREBITS2_DIFF;
+	if (mask & 0xffffffff00) mask |= DZ_CD_MOREBITS_DIFF;
+	if (mask & 0xffffff0000) mask |= DZ_CD_MOREBITS1_DIFF;
+	if (mask & 0xffff000000) mask |= DZ_CD_MOREBITS2_DIFF;
+	if (mask & 0xff00000000) mask |= DZ_CD_MOREBITS3_DIFF;
 
-	tmp = cnvlong(mask);
-	memcpy(buf,&tmp,4);
+	mask_out = cnvlong(mask);
+	memcpy(buf,&mask_out,5);
 	if (!(mask & DZ_CD_MOREBITS_DIFF))
-		{ memmove(buf+1,buf+4,ptr-buf-4); ptr -= 3; }
+		{ memmove(buf+1,buf+5,ptr-buf-5); ptr -= 4; }
 	else if (!(mask & DZ_CD_MOREBITS1_DIFF))
-		{ memmove(buf+2,buf+4,ptr-buf-4); ptr -= 2; }
+		{ memmove(buf+2,buf+5,ptr-buf-5); ptr -= 3; }
 	else if (!(mask & DZ_CD_MOREBITS2_DIFF))
-		{ memmove(buf+3,buf+4,ptr-buf-4); ptr -= 1; }
+		{ memmove(buf+3,buf+5,ptr-buf-5); ptr -= 2; }
+	else if (!(mask & DZ_CD_MOREBITS3_DIFF))
+		{ memmove(buf+4,buf+5,ptr-buf-5); ptr -= 1; }
 	insert_msg(buf,ptr-buf);
 
 	if (newcd.force != oldcd.force)
@@ -214,48 +298,105 @@ int dem_clientdata(void)
 
 int dem_spawnbaseline(void)
 {
-	uchar buf[16], *ptr;
+	uchar buf[32], *ptr = inptr + 3;
 	ent_t ent;
 	int index = getshort(inptr+1);
 	int diff;
+	uint16_t mask = 0;
+
+	uchar bits = 0;
+	uchar version = *inptr;
+	if (version == DEM_spawnbaseline2) bits = *ptr++;
+	else assert(version == DEM_spawnbaseline);
 
 	memset(&ent,0,sizeof(ent_t));
-	ent.modelindex = inptr[3];
-	ent.frame = inptr[4];
-	ent.colormap = inptr[5];
-	ent.skin = inptr[6];
-	ent.org0 = getshort(inptr+7);
-	ent.ang0 = inptr[9];
-	ent.org1 = getshort(inptr+10);
-	ent.ang1 = inptr[12];
-	ent.org2 = getshort(inptr+13);
-	ent.ang2 = inptr[15];
-	discard_msg(16);
+	if (bits & B_LARGEMODEL)
+		{ ent.modelindex = getshort(ptr); ptr += 2; }
+	else
+		{ ent.modelindex = *ptr++; }
+	if (bits & B_LARGEFRAME)
+		{ ent.frame = getshort(ptr); ptr += 2; }
+	else
+		{ ent.frame = *ptr++; }
+	ent.colormap = *ptr++;
+	ent.skin = *ptr++;
+	ent.org0 = getshort(ptr); ptr += 2;
+	ent.ang0 = *ptr++;
+	ent.org1 = getshort(ptr); ptr += 2;
+	ent.ang1 = *ptr++;
+	ent.org2 = getshort(ptr); ptr += 2;
+	ent.ang2 = *ptr++;
+	if (bits & B_ALPHA) ent.transparency = *ptr++;
+	discard_msg(ptr-inptr);
 
-	buf[0] = DEM_spawnbaseline;
-	diff = (index - sble + 0x400) % 0x400;
+	if (index >= MAX_ENT_OLD && version == DEM_spawnbaseline)
+		{ mask |= DZ_SB_LARGEENTITY; version = DEM_spawnbaseline2; }
+	buf[0] = version;
+	diff = (index - sble + MAX_ENT_OLD) % MAX_ENT_OLD;
+	if (version == DEM_spawnbaseline2) diff = index;
 	buf[1] = diff & 0xff;
 	buf[2] = diff >> 8;
 	ptr = buf+3;
-	*ptr++ = ent.modelindex;
-	if (ent.frame) { buf[2] |= DZ_SB_FRAME; *ptr++ = ent.frame; }
-	if (ent.colormap) { buf[2] |= DZ_SB_COLORMAP; *ptr++ = ent.colormap; }
-	if (ent.skin) { buf[2] |= DZ_SB_SKIN; *ptr++ = ent.skin; }
+	if (bits & B_LARGEMODEL)
+	{
+		mask |= DZ_SB_LARGEMODEL;
+		int tmp = ent.modelindex; tmp = cnvlong(tmp);
+		memcpy(ptr,&tmp,2); ptr += 2;
+	}
+	else { *ptr++ = ent.modelindex; }
+	if (ent.frame)
+	{
+		mask |= DZ_SB_FRAME;
+		if (bits & B_LARGEFRAME)
+		{
+			mask |= DZ_SB_LARGEFRAME;
+			int tmp = ent.frame; tmp = cnvlong(tmp);
+			memcpy(ptr,&tmp,2); ptr += 2;
+		}
+		else { *ptr++ = ent.frame; }
+	}
+	if (ent.colormap) { mask |= DZ_SB_COLORMAP; *ptr++ = ent.colormap; }
+	if (ent.skin) { mask |= DZ_SB_SKIN; *ptr++ = ent.skin; }
 	if (ent.org0 || ent.org1 || ent.org2)
 	{
 		int tmp;
-		buf[2] |= DZ_SB_ORIGIN;
+		mask |= DZ_SB_ORIGIN;
 		tmp = ent.org0; tmp = cnvlong(tmp); memcpy(ptr,&tmp,2);
 		tmp = ent.org1; tmp = cnvlong(tmp); memcpy(ptr+2,&tmp,2);
 		tmp = ent.org2; tmp = cnvlong(tmp); memcpy(ptr+4,&tmp,2);
 		ptr += 6;
 	}
-	if (ent.ang1) { buf[2] |= DZ_SB_ANGLE1; *ptr++ = ent.ang1; }
+	if (ent.ang1) { mask |= DZ_SB_ANGLE1; *ptr++ = ent.ang1; }
 	if (ent.ang0 || ent.ang2)
-	{	buf[2] |= DZ_SB_ANGLE0AND2; *ptr++ = ent.ang0; *ptr++ = ent.ang2; }
+	{	mask |= DZ_SB_ANGLE0AND2; *ptr++ = ent.ang0; *ptr++ = ent.ang2; }
+	if (bits & B_ALPHA) { mask |= DZ_SB_ALPHA; *ptr++ = ent.transparency; }
+
+	if (version == DEM_spawnbaseline2)
+	{
+		if (mask & 0xff00)
+		{
+			memmove(buf+5,buf+3,ptr-buf-3);
+			mask |= DZ_SB_MOREBITS;
+			buf[3] = mask & 0xff;
+			buf[4] = mask >> 8;
+			ptr += 2;
+		}
+		else
+		{
+			memmove(buf+4,buf+3,ptr-buf-3);
+			buf[3] = mask;
+			ptr++;
+		}
+	}
+	else
+	{
+		assert(!(mask & 0xff00) && !(mask & 0x03));
+		buf[2] |= mask;
+	}
+
 	insert_msg(buf,ptr-buf);
 	base[index] = ent;
-	sble = index;
+	if (version == DEM_spawnbaseline) sble = index;
 	copybaseline = 1;
 	return 0;
 }
@@ -310,6 +451,19 @@ int dem_skybox(void)
 }
 /* end nehahra */
 
+/* new messages for PROTOCOL_FITZQUAKE */
+int dem_spawnstatic2(void)
+{
+	uchar bits = inptr[1];
+	int msgsize = 15;
+	if (bits & B_LARGEMODEL) msgsize++;
+	if (bits & B_LARGEFRAME) msgsize++;
+	if (bits & B_ALPHA) msgsize++;
+	copy_msg(msgsize);
+	return 0;
+}
+/* end PROTOCOL_FITZQUAKE */
+
 int dem_copy_ue(void)
 {	/* 2.10: changed this to look more like uwe's demospecs */
 	unsigned short mask = inptr[0] & 0x7f;
@@ -318,9 +472,13 @@ int dem_copy_ue(void)
 	if (mask & U_MOREBITS)
 	{
 		mask |= inptr[len++] << 8;
-		if (mask & U_TRANS)
+		if (protocol == PROTOCOL_NETQUAKE && (mask & U_TRANS))
 			return 0;
 	}
+	if (protocol != PROTOCOL_NETQUAKE && (mask & U_EXTEND1))
+		{ mask |= inptr[len++] << 16; }
+	if (mask & U_EXTEND2) return 1;  /* unsupported */
+
 	if (mask & U_LONGENTITY) len++;	/* entity number */
 	if (mask & U_MODEL) len++;	/* model index */
 	if (mask & U_FRAME) len++;	/* frame */
@@ -333,6 +491,11 @@ int dem_copy_ue(void)
 	if (mask & U_ANGLE1) len++;	/* angles[1] */
 	if (mask & U_ORIGIN2) len += 2;/* origin[2] */
 	if (mask & U_ANGLE2) len++;	/* angles[2] */
+	if (mask & U_ALPHA) len++;
+	if (mask & U_SCALE) len++;
+	if (mask & U_FRAME2) len++;
+	if (mask & U_MODEL2) len++;
+	if (mask & U_LERPFINISH) len++;
 	copy_msg(len + 1);	// add one more for entity number
 	return 1;
 }
@@ -341,7 +504,7 @@ void diff_entities(void);
 
 int dem_updateentity(void)
 {
-	uint16_t mask = *inptr & 0x7f;
+	uint32_t mask = *inptr & 0x7f;
 	short entity;
 	static short lastentity;
 	int len = 1;
@@ -359,6 +522,10 @@ int dem_updateentity(void)
 	}
 
 	if (mask & U_MOREBITS) mask |= (inptr[len++] << 8);
+	if (protocol != PROTOCOL_NETQUAKE && (mask & U_EXTEND1))
+		{ mask |= (inptr[len++] << 16); }
+	if (mask & U_EXTEND2) return 1;  /* unsupported */
+
 	if (mask & U_LONGENTITY) {
 		entity = getshort(inptr+len);
 		len += 2;
@@ -379,11 +546,14 @@ int dem_updateentity(void)
 	if (mask & U_LONGENTITY && entity <= 0xff)
 		newent[entity].force |= DZ_UE_LONGENTITY_FORCE;
 
-	#define FDIFF(x,bit) if (newent[entity].x == base[entity].x) \
+	#define FDIFF(x,bit) if ((newent[entity].x) == (base[entity].x)) \
 					newent[entity].force |= bit;
+	#define FDIFF_WITH_DEFAULT(x,def,bit) \
+		if ((newent[entity].x) == (base[entity].x) || \
+		    (newent[entity].x) == def) { newent[entity].force |= bit; }
 	if (mask & U_MODEL)
 	    { newent[entity].modelindex = inptr[len++];
-	      FDIFF(modelindex,DZ_UE_MODEL_FORCE); }
+	      FDIFF(modelindex & 0x00ff,DZ_UE_MODEL_FORCE); }
 	if (mask & U_FRAME)
 	    { newent[entity].frame = inptr[len++]; FDIFF(frame,DZ_UE_FRAME_FORCE); }
 	if (mask & U_COLORMAP)
@@ -408,7 +578,7 @@ int dem_updateentity(void)
 	if (mask & U_ANGLE2)
 	    { newent[entity].ang2 = inptr[len++]; FDIFF(ang2,DZ_UE_ANGLE2_FORCE); }
 /* nehahra */
-	if (mask & U_TRANS)
+	if (protocol == PROTOCOL_NETQUAKE && (mask & U_TRANS))
 	{
 		float tmp = getfloat(inptr + len);
 		directory[numfiles].type = TYPE_NEHAHRA;
@@ -426,6 +596,31 @@ int dem_updateentity(void)
 		else newent[entity].fullbright = 0;
 		newent[entity].force |= DZ_UE_TRANS_FORCE;
 	}
+/* PROTOCOL_FITZQUAKE */
+	if (mask & U_ALPHA)
+		{ newent[entity].transparency = inptr[len++];
+		  FDIFF(transparency,DZ_UE_ALPHA_FORCE); }
+	if (mask & U_SCALE)
+		{ newent[entity].scale = inptr[len++];
+		  FDIFF(scale,DZ_UE_SCALE_FORCE); }
+	if (mask & U_FRAME2)
+	{
+		assert(mask & U_FRAME);
+		newent[entity].frame &= 0xff;
+		newent[entity].frame |= (inptr[len++] << 8);
+		FDIFF_WITH_DEFAULT(frame >> 8,0,DZ_UE_FRAME2_FORCE);
+	}
+	if (mask & U_MODEL2)
+	{
+		assert(mask & U_MODEL);
+		newent[entity].modelindex &= 0xff;
+		newent[entity].modelindex |= (inptr[len++] << 8);
+		FDIFF_WITH_DEFAULT(modelindex >> 8,0,DZ_UE_MODEL2_FORCE);
+	}
+	if (mask & U_LERPFINISH)
+		{ newent[entity].lerpfinish = inptr[len++];
+		  FDIFF(lerpfinish,DZ_UE_LERPFINISH_FORCE); }
+
 	newent[entity].newbit = mask & U_NOLERP;
 	newent[entity].present = 1;
 
@@ -454,7 +649,10 @@ int (* const dem_message[])(void) = {
 	NULL, dem_string, NULL, NULL,
 	NULL, NULL, dem_string, NULL,
 	NULL, dem_string,
-	dem_showlmp, dem_hidelmp, dem_skybox	/* nehahra */
+	dem_showlmp, dem_hidelmp, dem_skybox,	/* nehahra */
+/* New messages for PROTOCOL_FITZQUAKE */
+	NULL, NULL, NULL, NULL, dem_spawnbaseline, dem_spawnstatic2,
+	NULL
 };
 
 /* 2.10: removed all the dem_* functions that just did
@@ -462,7 +660,9 @@ int (* const dem_message[])(void) = {
 const uchar constCopy[] = {
 	1, 1, 6, 5, 3, 0, 0, 0, 0, 4, 0, 0, 0, 4, 0, 3,
 	3,12, 9,14, 1, 0, 0, 2, 2, 0, 1, 1,10, 1, 0, 3,
-	1, 0, 0, 0, 0
+	1, 0, 0, 0, 0,
+/* New messages for PROTOCOL_FITZQUAKE */
+	0, 0, 0, 6, 0, 0, 11
 };
 
 void update_activate(int i, int *baseval, uchar *buf)
@@ -478,7 +678,8 @@ void diff_entities(void)
 	uchar buf[32];
 	uchar *ptr;
 	long tmp;
-	int i, prev, mask;
+	int i, prev;
+	uint64_t mask;
 	int firstent;
 	int baseval = 0;
 	uchar *tptr = tmpblk;
@@ -544,14 +745,26 @@ void diff_entities(void)
 		if (o.ang2 != n.ang2)
 			{ mask |= DZ_UE_ANGLE2_DIFF; *ptr++ = bdiff(n.ang2,o.ang2); }
 		if (o.frame != n.frame)
-			{ if (n.frame - o.frame == 1) mask |= DZ_UE_FRAME_SINGLE_DIFF;
-			  else { mask |= DZ_UE_FRAME_NORMAL_DIFF;
-				 *ptr++ = bdiff(n.frame,o.frame); }
+		{
+			int diff = n.frame - o.frame;
+			if (diff == 1) mask |= DZ_UE_FRAME_SINGLE_DIFF;
+			else if ((n.frame >= 0 && n.frame <= UINT8_MAX &&
+			          o.frame >= 0 && o.frame <= UINT8_MAX) ||
+			         (diff >= INT8_MIN && diff <= INT8_MAX &&
+			          !(o.frame <= UINT8_MAX && n.frame > UINT8_MAX)))
+			{	if (diff < 0) diff += 256;
+				mask |= DZ_UE_FRAME_NORMAL_DIFF; *ptr++ = diff;
+			} else {
+				mask |= DZ_UE_FRAME2_DIFF; tmp = cnvlong(n.frame);
+				memcpy(ptr,&tmp,2); ptr += 2;
 			}
+		}
 		if (o.effects != n.effects)
 			{ mask |= DZ_UE_EFFECTS_DIFF; *ptr++ = n.effects; }
-		if (o.modelindex != n.modelindex)
+		if ((o.modelindex & 0x00ff) != (n.modelindex & 0x00ff))
 			{ mask |= DZ_UE_MODEL_DIFF; *ptr++ = n.modelindex; }
+		if ((o.modelindex >> 8) != (n.modelindex >> 8))
+			{ mask |= DZ_UE_MODEL2_DIFF; *ptr++ = (n.modelindex >> 8); }
 		if (o.newbit != n.newbit) mask |= DZ_UE_NOLERP_DIFF;
 		if (o.colormap != n.colormap)
 			{ mask |= DZ_UE_COLORMAP_DIFF; *ptr++ = n.colormap; }
@@ -569,6 +782,13 @@ void diff_entities(void)
 		}
 		if (n.fullbright != o.fullbright)
 			{ mask |= DZ_UE_NEHAHRA_FULLBRIGHT_DIFF; *ptr++ = n.fullbright; }
+
+		if (n.transparency != o.transparency)
+			{ mask |= DZ_UE_ALPHA_DIFF; *ptr++ = n.transparency; }
+		if (n.scale != o.scale)
+			{ mask |= DZ_UE_SCALE_DIFF; *ptr++ = n.scale; }
+		if (n.lerpfinish != o.lerpfinish)
+			{ mask |= DZ_UE_LERPFINISH_DIFF; *ptr++ = n.lerpfinish; }
 
 		if ((mask & 0xffff00) && !(mask & 0x0000ff))
 		{
@@ -611,7 +831,7 @@ void diff_entities(void)
 	insert_msg(tmpblk,tptr-tmpblk);
 
 	firstent = -1;
-	for (i = entlink[0]; i < MAX_ENT; i = entlink[i])
+	for (i = entlink[0]; i < MAX_ENT_OLD; i = entlink[i])
 	{
 		if (oldent[i].force == newent[i].force) continue;
 		if (firstent < 0)
@@ -620,12 +840,64 @@ void diff_entities(void)
 			buf[0] = DZ_IDENTIFIER_UPDATEENTITY_FORCE;
 			insert_msg(buf,1);
 		}
+		static_assert(DZ_UE_ORIGIN1_FORCE >= MAX_ENT_OLD,
+			"MAX_ENT_OLD too large for normal 'force' encoding. "
+			"MAX_ENT_OLD should be 1024.");
 		mask = i | (oldent[i].force ^ newent[i].force);
-		if (mask & 0xff0000) mask |= DZ_UE_MOREBITS_FORCE;
+		if (mask & 0xff000000)
+		{
+			assert(protocol != PROTOCOL_NETQUAKE);
+			mask |= DZ_UE_MOREBITS_FORCE|DZ_UE_MOREBITS2_FORCE;
+		}
+		else if (mask & 0xff0000) mask |= DZ_UE_MOREBITS_FORCE;
 		buf[0] = mask & 0xff;
 		buf[1] = (mask >> 8) & 0xff;
 		buf[2] = (mask >> 16) & 0xff;
-		insert_msg(buf,2+!!buf[2]);
+		buf[3] = (mask >> 24) & 0xff;
+		if (mask & 0xff000000)
+			{ insert_msg(buf,4); }
+		else if (mask & 0xff0000)
+			{ insert_msg(buf,3); }
+		else
+			{ insert_msg(buf,2); }
+	}
+
+	if (firstent > 0)
+	{
+		buf[0] = buf[1] = 0;
+		insert_msg(buf,2);
+	}
+
+	firstent = -1;
+	for (; i < MAX_ENT; i = entlink[i])
+	{
+		if (oldent[i].force == newent[i].force) continue;
+		if (firstent < 0)
+		{
+			firstent = i;
+			buf[0] = DZ_IDENTIFIER_UPDATEENTITY2_FORCE;
+			insert_msg(buf,1);
+		}
+		mask = i | ((uint64_t)(oldent[i].force ^ newent[i].force) << 8);
+		static_assert(DZ_UE_MOREBITS_FORCE >= MAX_ENT,
+			"MAX_ENT too large for extended 'force' encoding.");
+		if (mask & 0xff00000000)
+		{
+			assert(protocol != PROTOCOL_NETQUAKE);
+			mask |= (uint64_t)(DZ_UE_MOREBITS_FORCE|DZ_UE_MOREBITS2_FORCE) << 8;
+		}
+		else if (mask & 0xff000000) mask |= (DZ_UE_MOREBITS_FORCE << 8);
+		buf[0] = mask & 0xff;
+		buf[1] = (mask >> 8) & 0xff;
+		buf[2] = (mask >> 16) & 0xff;
+		buf[3] = (mask >> 24) & 0xff;
+		buf[4] = (mask >> 32) & 0xff;
+		if (mask & 0xff00000000)
+			{ insert_msg(buf,5); }
+		else if (mask & 0xff000000)
+			{ insert_msg(buf,4); }
+		else
+			{ insert_msg(buf,3); }
 	}
 
 	if (firstent > 0)
@@ -713,7 +985,7 @@ tryit:
 		dem_updateframe = lastent = 0;
 		while (inptr < inblk + inlen)
 		{
-			if (*inptr && *inptr <= DEM_skybox)
+			if (*inptr && *inptr <= DEM_spawnstaticsound2)
 			{
 				if (dem_updateframe == 1)
 				{

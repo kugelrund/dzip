@@ -28,8 +28,8 @@ LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 2,9,1,0
- PRODUCTVERSION 2,9,1,0
+ FILEVERSION 3,0,0,0
+ PRODUCTVERSION 3,0,0,0
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
  FILEFLAGS 0x1L
@@ -46,7 +46,7 @@ BEGIN
         BEGIN
             VALUE "CompanyName", "Speed Demos Archive\0"
             VALUE "FileDescription", "Dzip plugin for .dz files\0"
-            VALUE "FileVersion", "2.91\0"
+            VALUE "FileVersion", "3.0 beta\0"
             VALUE "LegalCopyright", "Copyright © 2003\0"
         END
     END
