@@ -32,7 +32,7 @@ void dzList (char *src)
 			printf(" %02u.%02u.%4u %02u:%02u:%02u",
 				(de->date >> 16) & 0x1f,
 				((de->date >> 21) & 0x0f) + 1,
-				((de->date >> 25) & 0x7f) + 1980,
+				((de->date >> 25) & 0xff) + 1980,
 				(de->date >> 11) & 0x1f,
 				(de->date >> 5) & 0x3f, (de->date & 0x1f) << 1);
 		printf("\n");

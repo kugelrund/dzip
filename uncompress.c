@@ -163,7 +163,7 @@ void setfiledate (char *filename, uInt date)
 	timerec.tm_sec = (date & 0x1f) << 1;
 	timerec.tm_mday = (date >> 16) & 0x1f;
 	timerec.tm_mon = (date >> 21) & 0x0f;
-	timerec.tm_year = ((date >> 25) & 0x7f) + 80;
+	timerec.tm_year = ((date >> 25) & 0xff) + 80;
 	timerec.tm_isdst = -1;
 	tbuf.actime = tbuf.modtime = mktime(&timerec);
 	utime(filename,&tbuf);

@@ -445,7 +445,7 @@ void DoFiles (char *fname, void (*func)(char *))
 	trec = localtime(&filestats.st_mtime);
 	filetime = (trec->tm_sec >> 1) + (trec->tm_min << 5)
 		+ (trec->tm_hour << 11) + (trec->tm_mday << 16)
-		+ (trec->tm_mon << 21) + ((trec->tm_year - 80) << 25);
+		+ (trec->tm_mon << 21) + ((uInt)(trec->tm_year - 80) << 25);
 
 	dzCompressFile(fname, filestats.st_size, filetime);
 	fclose(infile);
