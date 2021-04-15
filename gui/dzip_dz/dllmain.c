@@ -53,10 +53,10 @@ const gui_import_t *GetDllFuncs (gui_export_t *ex)
 {
 	ge = *ex;
 
-	inblk = ge.malloc(32768 * 3);
-	outblk = inblk + 32768;
-	tmpblk = outblk + 32768 / 2;
-	zbuf = tmpblk + 32768 / 2;
+	inblk = ge.malloc(p_blocksize * 3);
+	outblk = inblk + p_blocksize;
+	tmpblk = outblk + p_blocksize / 2;
+	zbuf = tmpblk + p_blocksize / 2;
 
 	zs.zalloc = ge.calloc;
 	zs.zfree = ge.free;
