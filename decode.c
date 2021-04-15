@@ -434,7 +434,7 @@ extern uchar te_size[];
 void demx_temp_entity(void)
 {
 	if (inptr[1] == 17)
-		copy_msg(strlen(inptr + 2) + 17);
+		copy_msg(strlen((char*)inptr + 2) + 17);
 	else
 		copy_msg(te_size[inptr[1]]);
 }

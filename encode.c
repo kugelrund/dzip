@@ -410,7 +410,7 @@ int dem_temp_entity(void)
 	if (entitytype == 17)
 	{
 		directory[numfiles].type = TYPE_NEHAHRA;
-		copy_msg(strlen(inptr + 2) + 17);
+		copy_msg(strlen((char*)inptr + 2) + 17);
 		return 0;
 	}
 	if (entitytype > 17)
