@@ -416,9 +416,11 @@ extern int zlevel;
 #define error ge.error
 #define deflate ge.deflate
 #define deflateEnd ge.deflateEnd
+#undef deflateInit
 #define deflateInit ge.deflateInit
 #define inflate ge.inflate
 #define inflateEnd ge.inflateEnd
+#undef inflateInit
 #define inflateInit ge.inflateInit
 
 #else
