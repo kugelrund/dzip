@@ -8,7 +8,8 @@ typedef struct {
 	void (*ArchiveFile_Write)(void *, uInt);
 	void *(*malloc)(uInt);
 	void *(*realloc)(void *, uInt);
-	void *(*calloc)(uInt);
+	void *(*calloc)(void *, uInt, uInt);
+	void (*free)(void *, void *);
 	char *(*strdup)(const char *);
 	void (*GuiProgressMsg)(const char *, ...);
 	void (*Infile_Read)(void *, uInt);

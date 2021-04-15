@@ -50,6 +50,7 @@ const gui_export_t ge = {
 	Dzip_malloc,
 	Dzip_realloc,
 	Dzip_calloc,
+	Dzip_free,
 	Dzip_strdup,
 	GuiProgressMsg,
 	Infile_Read,

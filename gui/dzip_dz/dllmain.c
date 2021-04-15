@@ -59,7 +59,7 @@ const gui_import_t *GetDllFuncs (gui_export_t *ex)
 	zbuf = tmpblk + 32768 / 2;
 
 	zs.zalloc = ge.calloc;
-	zs.zfree = free;
+	zs.zfree = ge.free;
 
 	return &gi;
 }
