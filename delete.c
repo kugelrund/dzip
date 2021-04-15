@@ -85,9 +85,11 @@ void dzDeleteFiles (uInt *list, uInt num, void (*Progress)(uInt, uInt))
 
 #include "dzipcon.h"
 
-int intcmp (const uInt *arg1, const uInt *arg2)
+int intcmp (const void *arg1, const void *arg2)
 {
-	if (*arg1 < *arg2) return -1;
+	const uInt lhs = *(const uInt*)arg1;
+	const uInt rhs = *(const uInt*)arg2;
+	if (lhs < rhs) return -1;
 	return 1;
 }
 
