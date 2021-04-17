@@ -46,7 +46,7 @@ BEGIN
         BEGIN
             VALUE "CompanyName", "Speed Demos Archive\0"
             VALUE "FileDescription", "Dzip plugin for .dz files\0"
-            VALUE "FileVersion", "3.0 beta\0"
+            VALUE "FileVersion", "3.0\0"
             VALUE "LegalCopyright", "Copyright © 2003\0"
         END
     END
