@@ -6,6 +6,8 @@
    (anthony@planetquake.com)
    GUI by Nolan Pflug
    (radix@planetquake.com)
+   Contributions by Sphere since 2021
+   (sphere@speeddemosarchive.com)
 */
 
 #include "dzip.h"

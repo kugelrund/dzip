@@ -22,6 +22,8 @@ const char abouttext[] =
 	"(radix@planetquake.com)\n"
 	"Initial version by Stefan Schwoon\n"
 	"(schwoon@in.tum.de)\n"
+	"Contributions by Sphere since 2021\n"
+	"(sphere@speeddemosarchive.com)\n"
 	"Compression using zlib library\n\n"
 	"http://speeddemosarchive.com/dzip/";
 
