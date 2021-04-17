@@ -1,0 +1,389 @@
+===========================================================================
+Title                   : Dzip v3.0
+
+Filename                : DzipGui.exe - Executable
+                          DzipShlx.dll - Dll for shell extensions
+                          DzipGui.txt - This file
+                          Dzip_*.dll - plugin dll modules
+
+Authors                 : Nolan Pflug, Stefan Schwoon, Sphere and others
+
+Description             : Dzip is a program for file compression.
+                          It's advantage over more popular compression
+                          software is in the size of the program, only 120k,
+                          easily fitting on a floppy disk.  Also it's
+                          compression is on par with standard .zip file
+                          compression and is sometimes marginally better.
+
+                          Dzip's original purpose was to compress demo
+                          recordings of the id software game Quake much better
+                          than any other program, and it still does this.
+
+                          Check out the Known Bugs section if you're
+                          using Netscape!
+
+                          This download is the Windows graphical interface
+                          version.  If you need a linux or solaris version, or
+                          if you would like the Dzip core source code, check
+                          out that download.
+
+Credits                 : Nolan had the original idea for Quake demo
+                          compression, Stefan created the inital version with
+                          just that purpose, and Nolan started the Windows GUI
+                          and expanded the program to be general purpose.
+
+                          Sphere started contributing in 2021 and added support
+                          for PROTOCOL_FITZQUAKE (protocol 666).
+
+Additional Credits to   : Jean-Loup Gailly and Mark Adler whose Zlib
+                          compression library is used by Dzip (see inside
+                          source package for more information).
+
+                          Attila Csernyik for most of the icons.
+
+                          Evan, Thomas, and others for their ideas.
+
+                          Anthony Bailey for writing the original Quake demo
+                          parsing source and for help with the Visual C++
+                          compiler.
+
+                          Uwe Girlich for the dem specs.
+
+                          Various people that helped during Dzip's early
+                          stages in the win32 newsgroups.
+
+                          All the people at Speedcon for being there
+                          and giving us a great time.
+
+===========================================================================
+
+Version history:
+
+18.04.21: Version 3.0
+          Added support for PROTOCOL_FITZQUAKE (protocol 666).
+          Updated zlib to v1.2.11
+
+07.05.03: Version 2.9
+          Dzip is now independent of the .dz format, it can work with potentially
+           any format by using plugin dll files.  Included in the original 2.9
+           relase is dlls for .dz files and .pak files, a format used by some games.
+          Dzip isn't so tight about sharing the file that it has open now, for
+           example now you can use ICQ to send a file that Dzip has open.
+
+31.07.02: Version 2.84
+          Fixed hopefully all remaining drag and drop problems, in 2.83 I broke
+           dropping on a file that accepts drops (like a .dz) for win2k/XP
+          Fixed encountering a .dem inside a pak that failed the dem test, or a
+           file that failed to compress would result in random behavior
+          Fixed test/extract of a file that had a corrupt file would give a
+           meaningless error like "error in inflate feed (-3)" that did not go
+           away when you pressed OK;  Now you'll get a CRC error
+          Fixed a few more minor progress bar issues, it works when more than
+           4GB of files are compressed at once, for example
+          Fixed not paying attention to the rule in win2k/XP about not
+           displaying underlines in menus unless the alt key is used
+          Fixed a new install would not get 'Compress with Dzip' when right
+           clicking on a file until DzipGui.exe was started for the first time
+          Fixed stupid mistake in 2.83 code changes resulted in menu icon for
+           view to be the one for test, and test to not have one
+
+28.06.02: Version 2.83
+          Fixed drag out and drop on treeview of an explorer window on win2k
+           and XP would freeze up both Dzip and the explorer window
+          Fixed drag out and drop on a non-explorer app and then aborting the
+           extract would still cause the other app to try to open the file
+          Fixed some progress bar problems and added a smooth option
+          Fixed compressing a directory would not compress any subdirectories
+           that had names starting with a period
+          Fixed compressing a directory that you do not have permission to
+           browse caused a garbled error message, or worse
+          Fixed couldn't select text in internal viewer with mouse in 2k/XP
+          Fixed directories wasting 8 bytes of space in the .dz
+          Fixed more minor memory and resource leaks
+          Fixed auto-lowercase and sort to work with non-english characters
+          Fixed caps lock state affecting Shift+key shortcuts
+          Fixed crash on asking to overwrite a file with really long name
+          Fixed another bad-dem compression problem
+          Fixed aborting at just the right time while adding files would crash
+          Don't ask to create a directory if you can't create it
+          Don't differentiate between "path" and "path\" in move/extract paths
+          Don't let windows handle critical errors, including unexpected crash
+          Store files at 0% whenever compression was unsuccessful, no matter
+           what the file size is (previously limited to 8MB)
+          Files of size 2GB to 4GB-1 can now be compressed, 4GB+ gives error
+          Added more system error prints to give more information
+          Sped up drag out and drop to explorer for .dem in win 9x
+          More things too minor to mention even here
+
+31.05.02: Version 2.82
+          Fixed crash on double clicking the main part of window when
+           there was no open file
+          Fixed dropping files on Dzip was disabled after closing a file
+          Fixed problems when a file dropped on Dzip could not be compressed
+          Fixed double clicking a column border to auto size the column
+           would not adjust the horizontal scroll bar if it was necessary
+          Fixed progress bar being off while testing a file that had
+           any pak files which were expanded
+          Fixed error boxes being on top of another application if Dzip was
+           not the foreground app when the error occured
+          Fixed extract sometimes failing without giving an error message
+          Fixed not giving an error message when reading a file during
+           compression encountered problems (eg bad sector)
+          Fixed crash on attempt to compress files that were >= 2GB in size
+          Fixed another problem with .dem compression
+          Fixed some resource leaks
+          Fixed running out of disk space while extracting a pak would
+           give out of disk space error message twice
+          Fixed always using "Folder" instead of the appropriate locale
+           description in the type column
+          Changed CRC error message to actually say what file is bad
+          Prevent the window from being restored completely offscreen at
+           startup (eg after reducing the desktop resolution)
+          More informative errors about entering bad filenames or paths
+           in various dialog boxes
+          Updated zlib library to v1.1.4 (thought i did this in 2.8 but nope)
+
+14.05.02: Version 2.81
+          Fixed hopefully all problems with compressing/uncompressing of
+           .dem files that, in some way, were not valid Quake demos
+          Fixed commands left active when chosing a file from recent file list
+           which could not be opened, and there was a previously open file
+          Fixed minor problem with internal viewer when files were >= 64KB
+
+03.05.02: Version 2.8
+          Sped up Dzip tremendously when working with .dz files that
+           contain thousands of files (mostly opening it)
+          Expanding/Collapsing of a pak file is now (nearly) instantaneous
+          Operations involving a lot of small files are faster because
+           the status bar won't update each individual message anymore
+          Added option to turn off "Compress with Dzip" in explorer menus
+          Added "Extract all to here" when right clicking on more than
+           one .dz file in explorer windows
+          Allow \\netdrive\path for the default extract path in an sfx
+          Added Yes/No to all buttons for overwrite prompt in an sfx
+          Fixed chosing an existing, read only file for a file to add
+           files to would cause "error: no error"
+          Fixed entering a bad path in file->new (like z:\test) would
+           not give an error message
+          Fixed some problems that occured if you changed system fonts/
+           number formats while Dzip was running
+          Fixed adding a .pif/.lnk file would add what those files were
+           shortcuts for instead of the .pif/.lnk file
+          Fixed some menu/file-type bugs under Windows 2000/XP
+
+01.07.01: Version 2.6
+          Added 'extract to current directory only' option for self-
+            extracting exe files
+          Added info screen to self-extracting exe so that people
+            using them know what program made them
+          Fixed files with 0% compression not working in self-extracting
+            exe files
+          Made it so just pressing ok for the directory to extract in a
+            self-extracting exe will extract files to the current directory
+          Fixed crash on compressing a file dated after y2.038k
+
+11.02.01: Version 2.55
+          Self extracting exe's now perform CRC checks and can have
+            a default extract directory
+          Added "No to All" and "Extract as..." buttons in the
+            "Overwrite file?" dialog box
+          Fixed issues with overwriting files when dragging to applications
+          You won't get a negative compression ratio anymore
+          Smaller Fixes (F2-rename problems, small memory leaks, progress
+            bar issues, more data validation)
+
+26.01.01: Version 2.51
+          Fixed problems with big toolbar's disabled buttons
+          Fixed some issues with the uninstall
+          Fixed installer giving files the wrong dates
+
+22.01.01: Version 2.5
+          Download is now an install program
+          Smaller exe/dll sizes
+          Extraction of Quake demo files now 4x or more faster
+          Added optional large toolbar
+          Self extracting exe files work above 256mb, have less overhead,
+            and warn when there's extraction problems
+          Fixed all issues related to path column, including sort
+          Settings are stored on a per-user basis if you use a
+            multi-user machine
+          Sped up opening very large .dz files
+          Fixed problems where commands were selectable when they shouldn't be
+          Added sort by extension
+          Changed the tooltips to be a bit more descriptive
+
+01.01.01: Version 2.4
+          Added ability to create self extracting exe files
+          Added "Sort by" in options menu
+          Fixed file dats being off when they are dragged to explorer windows
+          Fixed crash on deleting the last file of a .dz, if it was
+            an expanded pak
+          Changed about box to point to new webpage
+
+20.11.00: Version 2.3
+          Added expandable pak files, now you can see all the files inside
+             a pak and extract them individually
+          Fixed sort problems when path column was on
+          Fixed problems with selection box not always being used correctly
+          Added 'ignore path info' to Actions->extract dbox
+          Fixed problems with F2 to rename files
+          Fixed several really tiny problems
+          Added new options and put in an Options dbox instead of
+            checkable menus
+          Added an uninstall
+
+25.10.00: Version 2.21
+          Fixed being able to type in view window (how did i miss that!)
+          Fixed stupid bugs with extraction of pak files and progress bar
+            during extract
+
+24.10.00: Version 2.2
+          Fixed rare dem encoding problem with out of order
+            spawnbaseline messages
+          Fixed infinite error loops on trying to open corrupt dz files
+          You can now drag out from dzip to any location in explorer,
+            like the desktop
+          Added optional type and path columns, see options menu
+          While adding files, protection against bad .pak files
+          File->rename dz box will have current file in box already
+          Fixed dialog boxes like actions->extract wouldn't accept
+            very long paths
+          Fixed default options weren't being set on first use of dzip
+          Lots of other small bug fixes
+
+24.08.00: Version 2.1
+          Fixed a few more dem encoding problems (remaic related)
+          Better handling of tiny files
+          Added support for Nehahra .dem's
+          Other small bug fixes
+          Changes to the GUI:
+            Colorfull toolbar and menus... thanks to Attila Csernyik
+              for the icons
+            New icons for dz files, thanks again Attila :)
+            Sorting of files by any of the five columns
+            Options menu
+            Added ability to rename the files in a .dz (F2 or Actions->Rename)
+            Added compressing of whole folders by right clicking on them in
+               the shell, or by dragging them into the dzip window.  (you can't
+               add folders directly from Actions->Add yet)
+            Drag files out of dzip to various applications (but not the
+              shell, sorry :P)
+            Fixed inflate_feed bug after moving/renaming a dz file
+            Fixed an error with date displays (ex: July 31st would display
+              as August 1st)
+
+28.07.00: Version 2.0
+          Slightly improved compression
+          Significantly faster
+          Removed -p option; dzip now remembers if a file
+            was in a pak and re-creates the pak automatically
+          Fixed bugs for demos edited with demix or other tools
+          Date and time of files are preserved
+          Now displays compression ratio
+          Finally fixed all bugs with wildcard and path expansion
+          Vast improvements to the gui:
+          Can add new files to dz's created with v2.0
+          Can delete files from dz's created with v2.0
+          Display file date, compressed size and ratio for v2.0 files
+          Can extract just certain files instead of all of them
+          Dialog box to ask if you want to overwrite a file
+          Can move and rename dz's from the file menu
+          Lists of recently opened files, extract paths and move paths
+          Shell extension:
+            Can right click on non-dz files and pick "compress with dzip"
+            Can right click on dz files, drag them wherever and pick
+              "extract here"
+            Can drag files onto a dz file to add them
+
+04.07.00: GUI version 0.7
+          Opening and extracting existing .dz files only
+
+01.07.00: Version 1.2
+          Fixed wildcard bug in Windows version
+          Improved Hipnotic compatibility
+
+21.06.00: Version 1.1
+          Added wildcard expansion for Windows
+          Fixed a bug during decompression
+
+20.06.00: Version 1.0
+          Initial public release
+
+===========================================================================
+
+Comparison of Dzip's compression on Quake demo files,
+ (these results were from v1 of dzip)
+
+Demos            Zip size   Dzip size   Ratio
+
+SDA Nightmare
+run records        3.51M      1.78M     50.6%
+
+SDA Nightmare
+100% records       9.55M      5.20M     54.4%
+
+Marathon of Quake
+on Nightmare       7.53M      4.48M     59.5%
+
+Collection of
+Deathmatch demos   9.53M      5.60M     58.8%
+
+Devil's Covenant
+movie demos        1.85M      0.59M     31.8%
+
+===========================================================================
+
+Future plans:
+
+Opening of sfx files in gui and extracting them from other platforms
+Making plugin files for other file types: zip, rar, etc.
+
+I'm sure there is some interest in expanding the concept of demo
+compression to other games/formats like QuakeWorld, Quake2 etc.
+Also, I'm fairly confident that the ideas used in Dzip can be
+successful for these games, too. However, I'd rather focus on Dzip
+as a general-purpose compression program.
+
+===========================================================================
+
+Known Bugs:
+
+Saving a dz file in netscape that is on an http connection may
+corrupt the file.  The reason for this is the webserver is sending
+the file as plain text since it doesn't recognize the extension.
+Adding 'application/x-dzip' as a mime-type for .dz files on the
+server will fix the problem.
+
+NOTE: if you find *anything* that seems remotely wrong with the GUI,
+please tell me about it by mailing me at the address shown at the
+webpage.  In the last few days before a release, I invariably change
+things that could have broken some stuff but I didn't get the chance
+to retest every feature to make sure they all work.
+
+===========================================================================
+
+* Copyright information *
+
+Dzip is freeware; Copyright 2000-02 Nolan Pflug and friends.
+ Use it for whatever you like, but don't try to blame the
+ authors for anything bad that might happen.
+Use of the source code for the core program is subject to the
+ conditions pointed out in the readme file accompanying the source code.
+
+* Where to Get This *
+
+The Dzip homepage is at http://speeddemosarchive.com/dzip/
+
+* Related websites *
+
+Speed Demos Archive
+        http://speeddemosarchive.com/
+
+Quake done Quick
+        http://planetquake.com/qdq/
+
+Demtool
+        http://planetquake.com/qdq/demtool.html
+
+The demo specs page
+        http://planetquake.com/demospecs/

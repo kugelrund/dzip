@@ -1,0 +1,270 @@
+================================================================
+Title                   : Dzip v3.0
+
+Authors                 : Nolan Pflug, Stefan Schwoon, Sphere
+
+Description             : Dzip is a program for file compression.
+                          It's compression is on par with standard .zip file
+                          compression and is sometimes marginally better.
+
+                          Dzip's original purpose was to compress demo
+                          recordings of the id software game Quake much better
+                          than any other program, and it still does this.
+
+                          Check out the Known Bugs section if you're
+                          using Netscape!
+
+                          This release includes the source files and execu-
+                          tables for Linux, Windows, Solaris and Mac OS-X.
+                          A powerfull Windows graphical version is also
+                          available.
+
+                          Information on how to compile executables by
+                          yourself for other platforms is included in the
+                          source download (it's fairly straightforward).
+
+Installation            : Put the appropriate dzip exe for your system wherever
+                          you want it.
+
+Credits                 : Nolan had the idea for this program, maintains the
+                          Windows executable and the graphical user interface.
+
+                          Stefan executed Nolan's original idea, and now
+                          compiles and tests the linux and solaris versions.
+
+                          Sphere started contributing in 2021 and added support
+                          for PROTOCOL_FITZQUAKE (protocol 666).
+
+Additional Credits to   : Jean-Loup Gailly and Mark Adler whose Zlib
+                          compression library is used by Dzip (see inside
+                          source package for more information).
+
+                          Michael Hudson for providing the OS-X binary.
+
+                          Anthony Bailey for writing the original Quake demo
+                          parsing source and for help with the Visual C++
+                          compiler.
+
+                          Uwe Girlich for the dem specs.
+
+                          All the people at Speedcon for being there
+                          and giving us a great time.
+
+================================================================
+
+More detailed instructions
+
+Dzip runs in one of several modes of operation depending on
+the command line switches you give to it.
+
+Running Dzip without any arguments will give you a list of
+possible options which are discussed in greater detail here.
+
+General purpose option: -f
+  Normally, Dzip will refuse to overwrite existing files.
+  This is a simple policy to prevent you, the user, from
+  shooting yourself in the foot too easily... you can still
+  shoot yourself in the foot if you want, but you will need
+  to say so explicitly :) If you provide Dzip with the -f
+  switch, it will happily overwrite existing files if it
+  thinks it needs to.
+
+General purpose option: -e
+  Since v2.9 Dzip will continue execution after most errors, such
+  as a CRC error on extract or a problem reading from a file.
+  With this option the program will quit when the first error is
+  encountered.
+
+Compression: dzip [-e] [-f] [-0 .. -9] <filenames> [-o <outputfile>]
+
+  In this mode, Dzip will take specified files and compress them into.
+  a new dz file.  If -o is not specified, the name of the first filename
+  given will be used for the name of the dz file.  The filenames can
+  contain wildcards or directories, in which case the entire directory
+  is added.
+
+  The -0 to -9 switches set the compression level for zlib. -0 is no
+  comression at all, and -9 is the best, but there is not much difference
+  between -9 and even -1.  The normal compression used is -6.
+
+  Examples:
+      dzip example.dem
+        Compress example.dem, writing the result to example.dz.
+      dzip example.dem example.txt
+        Same as before, but also put example.txt into example.dz.
+      dzip example.dem -o another.dz
+        Compress example.dem, writing the result to another.dz.
+      dzip pak0.pak readme.txt -o marathon.dz
+        Get all the files from pak0.pak, compress them and write
+        the result to marathon.dz.
+
+
+Decompression: dzip -x [-e] [-f] <dzfiles>
+
+  When invoked like this, Dzip will treat the filenames given to it
+  as .dz archives and try to extract their contents.
+
+  Example:
+      dzip -x example.dz
+        Extract files from example.dz.
+
+
+Verifying an archive: dzip [-e] -v <dzfiles>
+
+  This switch simulates the extraction of a dz archive without
+  actually producing any files. This is useful for testing the
+  archive and checking if it will decompress correctly.
+
+  Example:
+      dzip -v -e *.dz
+        Verify every dz file in the current directory and quit on
+		any error.
+
+List an archive: dzip [-e] -l <dzfiles>
+
+  Lists the contents of a dz file.
+
+Add files to an exisiting archive: dzip [-e] -a <dzfile> <files>
+
+  Opens <dzfile> and then adds <files> to it, similar to compression
+  with no switches.
+
+Delete files from an exisiting archive: dzip [-e] -d <dzfile> <files>
+
+  Opens <dzfile> and then deletes <files> from it.  The file names list
+  must match exactly a file that is actually in <dzfile>, ignoring case.
+
+
+================================================================
+
+Version history:
+
+18.04.21: Version 3.0
+          added support for PROTOCOL_FITZQUAKE (protocol 666).
+          updated zlib to v1.2.11
+
+18.07.02: Version 2.9
+          added -a and -d to add/delete files from existing dz
+          add compression of whole directories
+          added error continuation and -e switch to quit on first error
+          added support for 2-4GB files on some platforms
+          changed layout of -l listings
+
+14.05.02: Version 2.8
+          fixed problems with compression/uncompression of .dem
+           files that were not compliant Quake demo files
+          updated zlib to v1.1.4
+
+24.01.01: Version 2.5
+          extraction of quake demos is now 4x or more faster
+          fixed a few minor problems
+
+24.10.00: Version 2.2
+          fixed rare dem encoding problem with out of order spawnbaseline messages
+          while adding files, protection against bad .pak files
+
+24.08.00: Version 2.1
+          fixed a few more dem encoding problems (Remaic-related)
+          better handling of tiny files
+          added support for Nehahra .dem's
+          other small bug fixes
+
+28.07.00: Version 2.0
+          slightly improved compression
+          significantly faster
+          removed -p option; dzip now remembers if a file
+           was in a pak and re-creates the pak automatically
+          fixed bugs for demos edited with demix or other tools
+          date and time of files are preserved
+          now displays compression ratio
+          finally fixed all bugs with wildcard and path expansion
+
+01.07.00: Version 1.2
+          fixed wildcard bug in Windows version
+          improved Hipnotic compatibility
+
+21.06.00: Version 1.1
+          added wildcard expansion for Windows (thanks Nolan)
+          fixed a bug during decompression
+
+20.06.00: Version 1.0
+          initial public release
+
+================================================================
+
+Results (from v1):
+
+I tried Dzip on different kinds of demos to see how well it
+would compress them; these are the results.
+
+Demos            Zip size   Dzip size   Ratio
+
+SDA Nightmare
+run records        3.51M      1.78M     50.6%
+
+SDA Nightmare
+100% records       9.55M      5.20M     54.4%
+
+Marathon of Quake
+on Nightmare       7.53M      4.48M     59.5%
+
+Collection of
+Deathmatch demos   9.53M      5.60M     58.8%
+
+Devil's Covenant
+movie demos        1.85M      0.59M     31.8%
+
+================================================================
+
+Future plans:
+
+Just work on the GUI.  Baring bugs there won't be any updates to
+the cmd line versions for a while.
+
+I'm sure there is some interest in expanding the concept of demo
+compression to other games/formats like QuakeWorld, Quake2 etc.
+Also, I'm fairly confident that the ideas used in Dzip can be
+successful for these games, too. However, we were only interested in
+demo compression for Quake because of the large size of the demos
+on SDA.  Feel free to use the source code to create compression of
+other file types!
+
+================================================================
+
+Known Bugs:
+
+This is not really a bug in dzip itself, but we mention it anyway:
+
+Saving a dz file in Netscape under Windows that is on an http
+connection may corrupt the file. The reason for this is if the
+webserver is sending the file as plain text since it doesn't
+recognize the extension, then Netscapes messes up all the line
+feeds. Adding 'application/x-dzip' as a mime-type for .dz files
+on the server will fix the problem.
+
+================================================================
+
+* Copyright information *
+
+Use of this program is free of charge.
+Use of the source code is subject to the conditions pointed
+out in the readme file accompanying the source code.
+
+* Where to Get This *
+
+The Dzip homepage is at http://speeddemosarchive.com/dzip/
+
+* Related websites *
+
+Speed Demos Archive
+        http://speeddemosarchive.com/
+
+Quake done Quick website
+        http://planetquake.com/qdq/
+
+Demtool
+        http://planetquake.com/qdq/demtool.html
+
+The demo specs page
+        http://planetquake.com/demospecs/
+

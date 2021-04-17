@@ -31,3 +31,7 @@ A simple way to generate the necessary Visual Studio projects is to use the `cma
 Make sure to target Win32, other platforms (including x64) are not supported for now.
 
 For big-endian machines, it is necessary to define `DZIP_BIG_ENDIAN`.
+
+## Usage
+
+See [dzip.txt](install/dzip.txt) and [DzipGui.txt](install/DzipGui.txt).
