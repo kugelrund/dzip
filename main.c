@@ -148,9 +148,8 @@ int dzReadDirectory (char *dzname)
 	min_ver = (dzheader.id >> 24) & 0xff;
 	if (maj_ver > MAJOR_VERSION)
 	{
-		error("%s was compressed with version %u ",
-			"but I'm only version %u", dzname,
-			maj_ver, MAJOR_VERSION);
+		error("%s was compressed with version %u but I'm only version %u",
+		      dzname, maj_ver, MAJOR_VERSION);
 		return 0;
 	}
 
