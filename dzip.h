@@ -311,6 +311,8 @@ typedef struct {
 	uInt len;
 } pakentry_t;
 
+uint32_t pak_file_identifier (void);
+
 int bplus (int, int);
 void copy_msg (uInt);
 void create_clientdata_msg (void);
@@ -351,7 +353,6 @@ void make_crc (uchar *, int);
 void normal_compress (uInt);
 void Outfile_Write (void *, uInt);
 
-#define pakid *(int *)"PACK"
 #define discard_msg(x) inptr += x
 
 #ifndef SFXVAR

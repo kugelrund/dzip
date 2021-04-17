@@ -21,7 +21,7 @@ void dzExtractFile (uInt filepos, int testing)
 	if (de->type == TYPE_PAK)
 	{
 		struct {
-			int id;
+			uint32_t id;
 			uInt offset;
 			uInt size;
 		} pakheader;
@@ -32,7 +32,7 @@ void dzExtractFile (uInt filepos, int testing)
 		memset(pakdir, 0, de->pak * sizeof(pakentry_t));
 		pakptr = 12;
 	/* write pak header */
-		pakheader.id = pakid;
+		pakheader.id = pak_file_identifier();
 		pakheader.size = de->pak * sizeof(pakentry_t);
 		pakheader.offset = de->real - pakheader.size;
 		pakheader.size = cnvlong(pakheader.size);	// thanks mwh

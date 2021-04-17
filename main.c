@@ -30,6 +30,14 @@ uchar *zbuf;
 uInt ztotal;
 int zlevel = Z_DEFAULT_COMPRESSION;
 
+uint32_t pak_file_identifier (void)
+{
+	uint8_t bytes[4] = {'P', 'A', 'C', 'K'};
+	uint32_t ret;
+	memcpy(&ret, bytes, 4);
+	return ret;
+}
+
 void dzWrite (void *ptr, int len)
 {
 	zs.next_in = ptr;

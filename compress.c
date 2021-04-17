@@ -94,7 +94,7 @@ void dzCompressFile (char *name, uInt filesize, uInt filedate)
 		direntry_t *pakde;
 		pakentry_t entry;
 		struct {
-			int id;
+			uint32_t id;
 			uInt offset;
 			uInt size;
 		} pakheader;
@@ -102,7 +102,7 @@ void dzCompressFile (char *name, uInt filesize, uInt filedate)
 		if (filesize < 12)	/* no way is it a pak! */
 			goto notapak;
 		Infile_Read(&pakheader, 12);
-		if (pakheader.id != pakid)
+		if (pakheader.id != pak_file_identifier())
 		{
 			fprintf(stderr, "warning: %s is not a pak file\n", name);
 			goto notapak;
