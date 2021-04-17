@@ -6,7 +6,7 @@ Dzip was originally written by Stefan Schwoon (<schwoon@in.tum.de>) and later up
 For more information, including on the earlier development, see the original [Readme](Readme) and the old [Dzip homepage](http://quake.speeddemosarchive.com/dzip/).
 
 Dzip makes use of the zlib library copyrighted by [Jean-loup Gailly](http://gailly.net/) and [Mark Adler](http://en.wikipedia.org/wiki/Mark_Adler).
-More information on zlib can be found at the [zlib homepage](http://www.zlib.org/).
+More information on zlib can be found at the [zlib homepage](https://www.zlib.net/).
 
 ## Builds
 
@@ -19,9 +19,9 @@ For other systems, please see section Compilation.
 For example, on unix systems, you may want to setup the build files using
 
 ```bash
-> mkdir build
-> cd build
-> cmake ..
+mkdir build
+cd build
+cmake ..
 ```
 
 followed by running `make` to compile, assuming you are using CMake with Makefiles.
