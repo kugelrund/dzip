@@ -51,7 +51,7 @@ add_executable(DzipGui
 )
 set_target_properties(DzipGui PROPERTIES WIN32_EXECUTABLE 1)
 target_compile_definitions(DzipGui PRIVATE GUI)
-target_link_libraries(DzipGui PRIVATE zlib comctl32)
+target_link_libraries(DzipGui PRIVATE dzip_zlib comctl32)
 # need to set this for the asm source file
 target_link_options(DzipGui PUBLIC "/SAFESEH:NO")
 

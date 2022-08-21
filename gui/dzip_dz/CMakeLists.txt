@@ -16,7 +16,8 @@ add_library(dzip_dz SHARED
     dzip_dz.rc
 )
 target_compile_definitions(dzip_dz PRIVATE _USRDLL GUI)
-target_link_libraries(dzip_dz
+target_link_libraries(dzip_dz PRIVATE
+    dzip_zlib
     debug ucrtd.lib optimized ucrt.lib
     debug vcruntimed.lib optimized vcruntime.lib
 )

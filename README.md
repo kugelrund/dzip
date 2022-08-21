@@ -15,7 +15,7 @@ For other systems, please see section Compilation.
 
 ## Compilation
 
-First make sure to clone the repository using `--recurse-submodules` to clone the required zlib sources too.
+If no system zlib is available, make sure to clone the repository using `--recurse-submodules` to clone the required zlib sources too.
 
 [CMake](https://cmake.org/) may be used to build Dzip.
 For example, on unix systems, you may want to setup the build files using

@@ -15,7 +15,17 @@ else()
     target_compile_options(dzip_warnings INTERFACE -Wall -Wextra -Wpedantic)
 endif()
 
-add_subdirectory(external)
+option(DZIP_USE_SYSTEM_ZLIB "Use system zlib if found." ON)
+if(DZIP_USE_SYSTEM_ZLIB)
+    find_package(ZLIB)
+endif()
+if(ZLIB_FOUND)
+    add_library(dzip_zlib INTERFACE)
+    target_link_libraries(dzip_zlib INTERFACE ZLIB::ZLIB)
+else()
+    add_subdirectory(external)
+endif()
+
 if(MSVC)
     # GUI only supported on Windows with MSVC for now
     add_subdirectory(gui)
@@ -35,5 +45,5 @@ add_executable(dzip
     uncompress.c
     v1code.c
 )
-target_link_libraries(dzip PRIVATE dzip_warnings zlib)
+target_link_libraries(dzip PRIVATE dzip_warnings dzip_zlib)
 install(TARGETS dzip DESTINATION .)
