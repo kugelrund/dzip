@@ -46,4 +46,4 @@ add_executable(dzip
     v1code.c
 )
 target_link_libraries(dzip PRIVATE dzip_warnings dzip_zlib)
-install(TARGETS dzip DESTINATION .)
+install(TARGETS dzip DESTINATION bin)
