@@ -3,7 +3,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "external/zlib/zlib.h"
+#include <zlib.h>
 
 typedef unsigned char uchar;
 
