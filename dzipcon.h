@@ -35,7 +35,7 @@
 #endif
 
 enum  { SW_OUTFILE, SW_LIST, SW_EXTRACT, SW_VIEW, SW_VERIFY,
-	SW_FORCE, SW_HALT, SW_ADD, SW_DELETE, NUM_SWITCHES };
+	SW_FORCE, SW_HALT, SW_ADD, SW_DELETE, SW_FULLPATHS, NUM_SWITCHES };
 
 void dzAddFile(char *);
 void dzClose (void);

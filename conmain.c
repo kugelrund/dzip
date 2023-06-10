@@ -1,10 +1,17 @@
 #include "dzip.h"
 #include "dzipcon.h"
 
+#ifdef _MSC_VER
+#include <direct.h>
+#define getcwd _getcwd
+#endif
+
 char flag[NUM_SWITCHES];
 char AbortOp, *dzname;
 uInt dzsize;
 FILE *infile, *outfile, *dzfile;
+static char cwd_buffer[260];
+static const char* cwd = NULL;
 
 /* read from file being compressed */
 void Infile_Read (void *buf, uInt num)
@@ -223,6 +230,7 @@ optname[] = {
 	{ 'd', SW_DELETE },
 	{ 'f', SW_FORCE },
 	{ 'e', SW_HALT },
+	{ 'p', SW_FULLPATHS },
 	{ 0, 0 }
 };
 
@@ -262,7 +270,8 @@ void usage(void)
 	"Options:\n"
 	"  -0 to -9: set compression level\n"
 	"  -e: quit program on first error\n"
-	"  -f: overwrite existing files\n\n"
+	"  -f: overwrite existing files\n"
+	"  -p: keep given full paths in archive\n\n"
 
 	"Copyright 2000-2005 Stefan Schwoon, Nolan Pflug\n",
 	MAJOR_VERSION, MINOR_VERSION
@@ -318,6 +327,31 @@ void DoDirectory (char *dname)
 	closedir(d);
 #endif
 	}
+}
+
+static char* StripCurrentWorkingDirectory(char* fullname)
+{
+	if (!cwd) {
+		return fullname;
+	}
+
+	const size_t cwd_length = strlen(cwd);
+	if (strlen(fullname) <= cwd_length) {
+		return fullname;
+	}
+	if (strncmp(fullname, cwd, cwd_length) != 0) {
+		return fullname;
+	}
+
+	char* name_without_cwd = fullname + cwd_length;
+	while (*name_without_cwd == '/' || *name_without_cwd == '\\') {
+		++name_without_cwd;
+	}
+
+	if (*name_without_cwd == '\0') {
+		return fullname;
+	}
+	return name_without_cwd;
 }
 
 void DoFiles (char *fname, void (*func)(char *))
@@ -390,7 +424,8 @@ void DoFiles (char *fname, void (*func)(char *))
 		FileTimeToLocalFileTime(&fd.ftLastWriteTime, &fd.ftLastAccessTime);
 		FileTimeToDosDateTime(&fd.ftLastAccessTime, (short *)&filetime + 1, (short *)&filetime);
 
-		dzCompressFile(fullname, fd.nFileSizeLow, filetime - (1 << 21));
+		char* name_without_cwd = StripCurrentWorkingDirectory(fullname);
+		dzCompressFile(name_without_cwd, fd.nFileSizeLow, filetime - (1 << 21));
 		fclose(infile);
 		if (AbortOp == 3)	/* had a problem reading from infile */
 			AbortOp = 0;	/* but still try the rest of the files */
@@ -447,7 +482,8 @@ void DoFiles (char *fname, void (*func)(char *))
 		+ (trec->tm_hour << 11) + (trec->tm_mday << 16)
 		+ (trec->tm_mon << 21) + ((uInt)(trec->tm_year - 80) << 25);
 
-	dzCompressFile(fname, filestats.st_size, filetime);
+	char* name_without_cwd = StripCurrentWorkingDirectory(fname);
+	dzCompressFile(name_without_cwd, filestats.st_size, filetime);
 	fclose(infile);
 	if (AbortOp == 3)	/* had a problem reading from infile */
 		AbortOp = 0;	/* but still try the rest of the files */
@@ -499,6 +535,9 @@ int main (int argc, char **argv)
 		+ !!flag[SW_VERIFY] + !!flag[SW_ADD] + !!flag[SW_DELETE]
 		+ !!flag[SW_OUTFILE])
 		errorFatal("conflicting switches");
+
+	if (!flag[SW_FULLPATHS])
+		cwd = getcwd(cwd_buffer, sizeof(cwd_buffer));
 
 	crc_init();
 	inblk = Dzip_malloc(p_blocksize * 3);
