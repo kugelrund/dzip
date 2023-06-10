@@ -88,24 +88,13 @@ void ReadRegistry (int *CmdShow)
 
 void ProcessCmdLine (char *CmdLine)
 {
-	// /x dzfile"file1"file2"...fileX" will compress file1...fileX
-	// into dzfile, make dzfile.exe and then quit
-//	int makeexe = !strncmp (CmdLine, "/x ", 3);  strcmp sucks for small strings
 	int CmdLine3 = 0xffffff & *(int *)CmdLine;
-	int makeexe = (CmdLine3 == ' x/');
 
-	if (*CmdLine != '/' || makeexe)
+	if (*CmdLine != '/')
 	{	// if we didn't get /something just try to open it
-		// for /x open it and then makeexe
 		WIN32_FIND_DATA f;
 		HANDLE h;
 		char *ext;
-
-		if (makeexe)
-		{
-			CmdLine += 3;
-			*strchr(CmdLine, '"') = 0;
-		}
 
 		if (*CmdLine == '"')	// stupid WinME
 		{
@@ -120,13 +109,8 @@ void ProcessCmdLine (char *CmdLine)
 		h = FindFirstFile(temp1, &f);
 		if (h == INVALID_HANDLE_VALUE)
 		{
-			if (!makeexe)
-			{	// only if somebody started it manually with an arg
-				error("%s does not exist", CmdLine);
-				return;
-			}
-			if (!NewArchive(temp1))
-				return;
+			error("%s does not exist", CmdLine);
+			return;
 		}
 		else
 		{
@@ -135,12 +119,6 @@ void ProcessCmdLine (char *CmdLine)
 			OpenArchive(temp1, 0);
 			if (!lvNumEntries)
 				return;
-		}
-		if (makeexe)
-		{
-			AddFilesFromCommandLine(CmdLine + strlen(CmdLine) + 1, 2);
-			MakeExe(0);
-			FileExit();
 		}
 	}
 //	else if (!strncmp (CmdLine, "/a ", 3) || !strncmp (CmdLine, "/d ", 3))  strcmp sucks for small strings

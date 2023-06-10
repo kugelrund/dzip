@@ -20,7 +20,6 @@ add_executable(DzipGui
     listview.h
     lvhelper.asm
     lvhelper.h
-    makesfx.c
     menu.c
     menu.h
     misc.c

@@ -10,10 +10,8 @@ typedef struct {
 	void (*ExpandFile)(unsigned int filepos);
 	void (*ExtractFile)(unsigned int filepos, int testing);
 	void (*FinishedAdd)(void);
-	void (*MakeExe)(char *exepath);
 	void (*OpenFile)(char *name);
 	int (*RenameFile)(unsigned int filepost, char *name);
-	int (*SFXstart)(void);
 } gui_import_t;
 
 // const in exe, non-const in dll
@@ -27,5 +25,4 @@ gui_import_t gi;
 #define UNSUPPORTED_DELETE 2
 #define UNSUPPORTED_EXTRACT 4
 #define UNSUPPORTED_RENAME 8
-#define UNSUPPORTED_MAKEEXE 16
 #define UNSUPPORTED_TEST 32

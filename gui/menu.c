@@ -308,7 +308,6 @@ void MenuActivateCommands(void)
 	ChangeCommand(ID_ACTIONS_DELETE, v && !ReadOnly && !(gi.flags & UNSUPPORTED_DELETE));
 	ChangeCommand(ID_ACTIONS_EXTRACT, v && !(gi.flags & UNSUPPORTED_EXTRACT));
 	ChangeCommand(ID_ACTIONS_VIEW, v && !(gi.flags & UNSUPPORTED_EXTRACT));
-	ChangeCommand(ID_ACTIONS_MAKEEXE, v && !(gi.flags & UNSUPPORTED_MAKEEXE));
 	ChangeCommand(ID_ACTIONS_RENAME, v && !ReadOnly && !(gi.flags & UNSUPPORTED_RENAME));
 	ChangeCommand(ID_ACTIONS_SELECTALL, v);
 	ChangeCommand(ID_ACTIONS_INVERT, v);
@@ -350,7 +349,7 @@ void (* const MenuFunc[NUMMENU])(void) = {
 	FileRecentFile1, FileRecentFile2, FileRecentFile3, FileRecentFile4, 
 	FileRecentFile5, FileRecentFile6, FileRecentFile7, FileRecentFile8, 
 	FileRecentFile9, ActionsAdd, ActionsDelete,
-	ActionsExtract, ActionsView, ActionsMakeExe, ActionsRename,
+	ActionsExtract, ActionsView, ActionsRename,
 	ActionsSelectAll, ActionsInvert, ActionsTest, ActionsAbort,
 	HelpAbout, SortByPathFilename, SortByModified, SortBySize,
 	SortByRatio, SortByPacked, SortByType, SortByFilename,
@@ -361,7 +360,7 @@ void (* const MenuFunc[NUMMENU])(void) = {
 const BYTE MenuIconList[] = {
 	ID_FILE_NEW, ID_FILE_OPEN, ID_ACTIONS_ADD, ID_ACTIONS_DELETE,
 	ID_ACTIONS_EXTRACT, ID_ACTIONS_VIEW, ID_ACTIONS_TEST,
-	ID_ACTIONS_ABORT, ID_HELP_ABOUT, ID_FILE_EXIT, ID_ACTIONS_MAKEEXE
+	ID_ACTIONS_ABORT, ID_HELP_ABOUT, ID_FILE_EXIT
 };
 
 void CreateMenuBar(void)
@@ -393,7 +392,6 @@ void CreateMenuBar(void)
 	AppendMenu(Menu.actions, MF_OWNERDRAW, ID_ACTIONS_EXTRACT, "&Extract...");
 	AppendMenu(Menu.actions, MF_OWNERDRAW, ID_ACTIONS_VIEW, "&View...");
 	AppendMenu(Menu.actions, MF_OWNERDRAW, ID_ACTIONS_RENAME, "&Rename");
-	AppendMenu(Menu.actions, MF_OWNERDRAW, ID_ACTIONS_MAKEEXE, "Make E&xe...");
 	AppendMenu(Menu.actions, MF_SEPARATOR, 0, 0);
 	AppendMenu(Menu.actions, MF_OWNERDRAW, ID_ACTIONS_SELECTALL, "&Select All");
 	AppendMenu(Menu.actions, MF_OWNERDRAW, ID_ACTIONS_INVERT, "&Invert Selection");

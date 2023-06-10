@@ -18,10 +18,8 @@
 #define IDD_RESET                       111
 #define IDD_YESNO                       112
 #define IDD_OPTIONS                     113
-#define IDR_SFX                         121
 #define IDB_TOOLBARBIG                  122
 #define IDI_UNINSTALL                   124
-#define IDD_MAKESFX                     133
 #define IDD_FILETYPES                   136
 #define IDD_CHOOSEEXT                   137
 #define ID_BROWSE                       1001

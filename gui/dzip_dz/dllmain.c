@@ -19,10 +19,8 @@ void dzCloseFile(void);
 void dzDeleteFiles(uInt *, uInt, void (*)(uInt, uInt));
 void dzExpandFile(uInt);
 void dzFinishedAdd(void);
-void dzMakeExe(char *);
 void dzOpenFile(char *);
 int dzRenameFile(uInt, char *);
-int dzSFXstart(void);
 
 const gui_import_t gi = {
 	1,
@@ -36,10 +34,8 @@ const gui_import_t gi = {
 	dzExpandFile,
 	dzExtractFile,
 	dzFinishedAdd,
-	dzMakeExe,
 	dzOpenFile,
 	dzRenameFile,
-	dzSFXstart
 };
 
 __declspec(dllexport)

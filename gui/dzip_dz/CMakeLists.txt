@@ -1,8 +1,6 @@
 add_library(dzip_dz SHARED
     dllmain.c
     dz.c
-    sfx.c
-    sfx.h
     resource.h
     ../../compress.c
     ../../decode.c

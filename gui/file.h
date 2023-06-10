@@ -2,6 +2,5 @@
 void CloseArchive(void);
 void DeleteCurrentFile(void);
 int GetNewFileName(int);
-void MakeExe(int);
 int NewArchive(char *);
 void ReopenFile(int);

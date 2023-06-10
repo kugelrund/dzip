@@ -18,7 +18,6 @@ void ActionsAbort(void);
 void ActionsDelete(void);
 void ActionsExtract(void);
 void ActionsInvert(void);
-void ActionsMakeExe(void);
 void ActionsRename(void);
 void ActionsSelectAll(void);
 void ActionsTest(void);
@@ -46,7 +45,7 @@ enum {
 	ID_FILE_FILE3, ID_FILE_FILE4, ID_FILE_FILE5, ID_FILE_FILE6,
 	ID_FILE_FILE7, ID_FILE_FILE8, ID_FILE_FILE9, ID_ACTIONS_ADD,
 	ID_ACTIONS_DELETE, ID_ACTIONS_EXTRACT, ID_ACTIONS_VIEW,
-	ID_ACTIONS_MAKEEXE,	ID_ACTIONS_RENAME, ID_ACTIONS_SELECTALL,
+	ID_ACTIONS_RENAME, ID_ACTIONS_SELECTALL,
 	ID_ACTIONS_INVERT, ID_ACTIONS_TEST, ID_ACTIONS_ABORT, ID_HELP_ABOUT,
 	NUMOWNERDRAWN,
 	ID_SORT_PATHFILENAME = NUMOWNERDRAWN,	// dont waste a number :)

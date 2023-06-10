@@ -1,4 +1,3 @@
-#include "sfx.h"
 #include "..\..\dzip.h"
 
 void dzFinishedAdd(void)
@@ -123,36 +122,4 @@ void dzAddFile (char *name, uInt filesize, uInt filedate)
 	de -= de->pak;
 	ge.LVAddFileToListView(de->name, de->date, de->real, de->size,
 		de - directory, de->type == TYPE_PAK);
-}
-
-void dzMakeExe (char *exepath)
-{
-	uInt filelen, size;
-
-	filelen = dzFile_Size() - 4;
-	dzFile_Seek(4);
-
-	inflateInit(&zs);
-	zs.avail_in = SFX_COMPRESSED_SIZE;
-	zs.next_in = (char *)sfx;
-	zs.avail_out = SFX_REAL_SIZE;
-	zs.next_out = inblk;
-	inflate(&zs, Z_NO_FLUSH);
-	inflateEnd(&zs);
-
-	strcpy(inblk + (SFX_REAL_SIZE - 0xc00), exepath);
-	Outfile_Write(inblk, SFX_REAL_SIZE);
-
-	while (filelen && !AbortOp)
-	{
-		size = (filelen > p_blocksize * 2) ? p_blocksize * 2 : filelen;
-		dzFile_Read(inblk, size);
-		Outfile_Write(inblk, size);
-		filelen -= size;
-	}
-}
-
-int dzSFXstart(void)
-{
-	return SFX_REAL_SIZE - 4;
 }

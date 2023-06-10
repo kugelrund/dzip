@@ -242,7 +242,7 @@ int pakRenameFile (uInt filepos, char *name)
 const gui_import_t gi = {
 	1,
 	"pak",
-	UNSUPPORTED_MAKEEXE|UNSUPPORTED_TEST,
+	UNSUPPORTED_TEST,
 	pakAddFile,
 	pakAddFolder,
 	pakBeginAdd,
@@ -251,10 +251,8 @@ const gui_import_t gi = {
 	NULL,
 	pakExtractFile,
 	pakFinishedAdd,
-	NULL,
 	pakOpenFile,
-	pakRenameFile,
-	NULL
+	pakRenameFile
 };
 
 __declspec(dllexport)

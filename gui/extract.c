@@ -62,9 +62,6 @@ void Outfile_Write (void *buf, UINT num)
 
 	switch (ThreadType)
 	{
-	case THREAD_MAKEEXE:
-		Outfile_Flush(buf, num);
-		return;
 	case THREAD_TEST:
 		PBarAdvance(num);
 		return;
