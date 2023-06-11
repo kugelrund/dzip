@@ -353,7 +353,7 @@ BEGIN
             VALUE "CompanyName", "Speed Demos Archive\0"
             VALUE "FileDescription", "Dzip\0"
             VALUE "FileVersion", "3.0\0"
-            VALUE "LegalCopyright", "Copyright ï¿½ 2006\0"
+            VALUE "LegalCopyright", "Copyright © 2006\0"
         END
     END
     BLOCK "VarFileInfo"
