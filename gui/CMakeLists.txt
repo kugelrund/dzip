@@ -1,6 +1,5 @@
 add_subdirectory(dzip_dz)
 add_subdirectory(dzip_pak)
-add_subdirectory(shlx)
 
 enable_language(ASM_MASM)
 add_executable(DzipGui
@@ -44,7 +43,6 @@ add_executable(DzipGui
     dzipgui.ico
     tbbig.dat
     tbsmall.bmp
-    uninstall.ico
     dzipgui.ico
     dzipgui.rc
 )

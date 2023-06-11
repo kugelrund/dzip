@@ -155,9 +155,6 @@ void ProcessCmdLine (char *CmdLine)
 		if (Options.AutoClose)
 			FileExit();
 	}
-//	else if (!strcmp(CmdLine, "/u")) strcmp sucks for small strings
-	else if (CmdLine3 == '\0u/')
-		OptionsUninstall();
 	else
 	{
 		strcpy(temp1, CmdLine);

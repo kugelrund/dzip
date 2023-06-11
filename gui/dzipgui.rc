@@ -53,7 +53,6 @@ END
 // Icon with lowest ID value placed first to ensure application icon
 // remains consistent on all systems.
 IDI_DZ                  ICON    DISCARDABLE     "dzipgui.ico"
-IDI_UNINSTALL           ICON    DISCARDABLE     "uninstall.ico"
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -166,7 +165,6 @@ BEGIN
                     14
     PUSHBUTTON      "Clear Recent &Move paths",IDC_CLEARRMOVE,7,45,92,14
     PUSHBUTTON      "Reset &Columns",IDC_RESETCOLUMNS,7,64,92,14
-    PUSHBUTTON      "Reset &Shell Integration",IDC_RESETSHLX,7,83,92,14
 END
 
 IDD_YESNO DIALOG DISCARDABLE  0, 0, 130, 58
@@ -205,33 +203,14 @@ BEGIN
                     BS_AUTOCHECKBOX | WS_TABSTOP,67,19,104,10
     CONTROL         "&Show selected in status bar",IDC_SELECTED,"Button",
                     BS_AUTOCHECKBOX | WS_TABSTOP,67,31,104,10
-    CONTROL         "&Close Dzip after ""Extract here""",IDC_AUTOCLOSE,
-                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,67,43,112,10
     CONTROL         "Make filenames &Lowercase on add",IDC_LCFILENAMES,
                     "Button",BS_AUTOCHECKBOX | WS_TABSTOP,67,55,126,10
-    CONTROL         "Enable ""Compress with Dzip"" in E&xplorer",
-                    IDC_EXPCMPWDZ,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,8,67,
-                    143,10
     CONTROL         "Use ""&All Files"" as default in Actions->Add dialog box",
                     IDC_ALLFILES,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,8,79,
                     179,10
     LTEXT           "Files in &Recent List:",IDC_STATIC,9,93,62,8
     COMBOBOX        IDC_RFL,74,91,23,109,CBS_DROPDOWNLIST | CBS_SORT | 
                     WS_VSCROLL | WS_TABSTOP
-END
-
-IDD_FILETYPES DIALOG DISCARDABLE  0, 0, 186, 100
-STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
-CAPTION "File Types"
-FONT 8, "MS Sans Serif"
-BEGIN
-    DEFPUSHBUTTON   "OK",IDOK,29,79,50,14
-    PUSHBUTTON      "Cancel",IDCANCEL,99,79,50,14
-    LTEXT           "The following extensions can be opened by Dzip.\nWhich do you want to register with Dzip in explorer?",
-                    IDC_STATIC,7,7,171,17
-    CONTROL         "List3",IDC_LVFILETYPES,"SysListView32",LVS_REPORT | 
-                    LVS_SORTASCENDING | LVS_NOCOLUMNHEADER | WS_BORDER | 
-                    WS_TABSTOP,7,26,172,47
 END
 
 IDD_CHOOSEEXT DIALOG DISCARDABLE  0, 0, 129, 73
@@ -334,14 +313,6 @@ BEGIN
         RIGHTMARGIN, 197
         TOPMARGIN, 7
         BOTTOMMARGIN, 131
-    END
-
-    IDD_FILETYPES, DIALOG
-    BEGIN
-        LEFTMARGIN, 7
-        RIGHTMARGIN, 179
-        TOPMARGIN, 7
-        BOTTOMMARGIN, 93
     END
 
     IDD_CHOOSEEXT, DIALOG

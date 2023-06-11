@@ -354,7 +354,7 @@ void (* const MenuFunc[NUMMENU])(void) = {
 	HelpAbout, SortByPathFilename, SortByModified, SortBySize,
 	SortByRatio, SortByPacked, SortByType, SortByFilename,
 	SortByExtension, SortByNone, SortReverse, OptionsOptions,
-	OptionsFileTypes, OptionsReset, OptionsUninstall
+	OptionsReset
 };
 
 const BYTE MenuIconList[] = {
@@ -415,10 +415,7 @@ void CreateMenuBar(void)
 	options = CreatePopupMenu();
 	AppendMenu(options, MF_POPUP|MF_STRING, (int)sort, "&Sort by");
 	AppendMenu(options, MF_STRING, ID_OPTIONS_OPTIONS, "Dzip &Options...");
-	AppendMenu(options, MF_STRING, ID_OPTIONS_FILETYPES, "&File Types...");
 	AppendMenu(options, MF_STRING, ID_OPTIONS_RESET, "&Reset Settings...");
-	AppendMenu(options, MF_SEPARATOR, 0, 0);
-	AppendMenu(options, MF_STRING, ID_OPTIONS_UNINSTALL, "&Uninstall...");
 
 	Menu.help = CreatePopupMenu();
 	AppendMenu(Menu.help, MF_OWNERDRAW, ID_HELP_ABOUT, "&About...");

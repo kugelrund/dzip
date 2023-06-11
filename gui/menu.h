@@ -23,9 +23,7 @@ void ActionsSelectAll(void);
 void ActionsTest(void);
 void ActionsView(void);
 void OptionsOptions(void);
-void OptionsFileTypes(void);
 void OptionsReset(void);
-void OptionsUninstall(void);
 void HelpAbout(void);
 
 void CreateMenuBar(void);
@@ -51,8 +49,7 @@ enum {
 	ID_SORT_PATHFILENAME = NUMOWNERDRAWN,	// dont waste a number :)
 	ID_SORT_MODIFIED, ID_SORT_SIZE, ID_SORT_RATIO, ID_SORT_PACKED,
 	ID_SORT_TYPE, ID_SORT_FILENAME, ID_SORT_EXTENSION, ID_SORT_NONE,
-	ID_SORT_REVERSE, ID_OPTIONS_OPTIONS, ID_OPTIONS_FILETYPES,
-	ID_OPTIONS_RESET, ID_OPTIONS_UNINSTALL,
+	ID_SORT_REVERSE, ID_OPTIONS_OPTIONS, ID_OPTIONS_RESET,
 	NUMMENU
 };
 

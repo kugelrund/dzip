@@ -19,8 +19,6 @@
 #define IDD_YESNO                       112
 #define IDD_OPTIONS                     113
 #define IDB_TOOLBARBIG                  122
-#define IDI_UNINSTALL                   124
-#define IDD_FILETYPES                   136
 #define IDD_CHOOSEEXT                   137
 #define ID_BROWSE                       1001
 #define IDC_TEXT                        1002
@@ -59,9 +57,7 @@
 #define IDC_WINDOWS                     1033
 #define IDC_TEMP                        1034
 #define IDC_CURRENTONLY                 1035
-#define IDC_RESETSHLX                   1036
 #define IDC_SMOOTHPBAR                  1037
-#define IDC_LVFILETYPES                 1040
 #define IDC_STATIC                      -1
 
 // Next default values for new objects
