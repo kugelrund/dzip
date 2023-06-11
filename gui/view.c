@@ -137,52 +137,11 @@ int CALLBACK ViewerDlgFunc (HWND hDlg, UINT msg, WPARAM wParam, LPARAM lParam)
 	return 0;
 }
 
-int ViewGetExeName (char *name)
-{
-	char MSDev = 0;
-	name = FileExtension(name);
-	if (!ReadRegValue(HKEY_CLASSES_ROOT, name, "", temp1, 256))
-		return 0;
-	strcat(temp1, "\\shell\\open\\command");
-	if (!ReadRegValue(HKEY_CLASSES_ROOT, temp1, "", temp2, 256))
-	{	// hacky way to deal with msdev files
-		strcpy(temp1 + strlen(temp1) - 12, "&Open with MSDev\\command");
-		if (!ReadRegValue(HKEY_CLASSES_ROOT, temp1, "", temp2, 256))
-			return 0;
-		MSDev = 1;
-	}
-	name = temp2;
-	if (*name == '"')
-	{
-		name = strchr(name + 1, '"');
-		*name++ = 0;
-	}
-	name = strchr(name, ' ');
-	if (name) *name = 0;
-
-//	if (!strcmp(temp2, "\"%1"))
-//		return 0;	strcmp sucks for small strings
-	if (*(int *)temp2 == '1%"')
-		return 0;
-	return 1 + MSDev;
-}
-
 int CALLBACK ViewDlgFunc (HWND hDlg, UINT msg, WPARAM wParam, LPARAM lParam)
 {
 	switch (msg)
 	{
 	case WM_INITDIALOG:
-		if (ViewGetExeName((char *)lParam))
-		{
-			sprintf(temp1, "&Associated program: %s", GetFileFromPath(temp2));
-			*FileExtension(temp1) = 0;
-			SetDlgItemText(hDlg, IDC_RADIO1, temp1);
-		}
-		else
-		{
-			SetDlgItemText(hDlg, IDC_RADIO1, "&Associated program:");
-			EnableWindow(GetDlgItem(hDlg, IDC_RADIO1), 0);
-		}
 		CheckDlgButton(hDlg, IDC_RADIO2, 1);
 		return 1;
 	case WM_COMMAND:
@@ -207,13 +166,6 @@ void ViewFile (int type)
 		if (type == -1) return;
 	}
 
-	if (type)
-		if (!(type = ViewGetExeName(lve->filename)))
-		{
-			error("No associated program\n");
-			return;
-		}	// now type is 2 if it's an msdev file
-
 	ExtractSetup(2, 0, NULL);
 	Extract.NoPaths = 1;
 
@@ -233,8 +185,7 @@ void ViewFile (int type)
 			FreeLibrary(re);
 		}
 		else
-			ShellExecute(MainWnd, View.type == 1 ? "open" : "&Open with MSDev",
-				tempfiles->name, NULL, View.temppath, SW_SHOW);
+			ShellExecute(MainWnd, "open", tempfiles->name, NULL, View.temppath, SW_SHOW);
 }
 
 void ActionsView(void)
