@@ -13,11 +13,11 @@
 
 menu_t Menu;
 
-const char * const MenuShortcut[] = {
+const char * const MenuShortcut[NUMOWNERDRAWN] = {
 	"Ctrl+N", "Ctrl+O", "Ctrl+F4", NULL, NULL, "Alt+F4",
 	NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
 	"Shift+A", "Shift+D", "Shift+E", "Shift+V", NULL,
-	"F2", "Ctrl+A", "Ctrl+I", "Shift+T", "Esc", NULL
+	"F2", "Ctrl+A", "Ctrl+I", "Shift+T", "Esc"
 };
 
 char FileRenameText[20], FileMoveText[20];	// buffer overflow alert
