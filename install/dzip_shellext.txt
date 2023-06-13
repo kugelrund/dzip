@@ -1,0 +1,26 @@
+# Dzip Shell Extensions
+
+Simple shell extensions for Dzip v3.1
+
+## Install/Uninstall
+
+Run "dzip_shellext_install.bat" or "dzip_shellext_uninstall.bat" respectively as
+admin (right-click on the files and click "Run as admin").
+
+Note that dzip.exe is assumed to be right next to these .bat scripts, as should
+be the case in your downloaded files. If dzip.exe is ever moved after
+installation, the shell extensions will not work anymore. To fix this, just run
+the .bat scripts properly again.
+
+## Usage
+
+Compression: Select any number of files and folders, right-click and choose
+"Send To > Dzip". This will create an archive in your current directory
+containing all selected files.
+
+Decompression: Right-click any .dz file and choose "Extract with Dzip". This
+will unpack all files into your current directory (as long as filepaths within
+the .dz are relative).
+
+Note that on Windows 11, these menus will only be available in the extended
+context menu accessed by "Show more options".

@@ -1,10 +1,9 @@
 ===========================================================================
-Title                   : Dzip v3.0
+Title                   : Dzip v3.1
 
 Filename                : DzipGui.exe - Executable
-                          DzipShlx.dll - Dll for shell extensions
                           DzipGui.txt - This file
-                          Dzip_*.dll - plugin dll modules
+                          dzip_*.dll - plugin dll modules
 
 Authors                 : Nolan Pflug, Stefan Schwoon, Sphere and others
 
@@ -58,6 +57,11 @@ Additional Credits to   : Jean-Loup Gailly and Mark Adler whose Zlib
 ===========================================================================
 
 Version history:
+
+13.06.23: Version 3.1
+          Fixed double clicking files not opening associated programs
+          Removed obsolete self-extraction feature and shell extensions
+          New simple shell extensions, see dzip_shellext.txt
 
 18.04.21: Version 3.0
           Added support for PROTOCOL_FITZQUAKE (protocol 666).

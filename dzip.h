@@ -12,7 +12,7 @@ typedef unsigned char uchar;
 #define MAX_ENT 32768
 #define MAX_ENT_OLD 1024  /* MAX_ENT before version 3.0 */
 #define MAJOR_VERSION 3
-#define MINOR_VERSION 0
+#define MINOR_VERSION 1
 #define INITCRC 0xffffffff
 
 enum { TYPE_NORMAL, TYPE_DEMV1, TYPE_TXT, TYPE_PAK, TYPE_DZ, TYPE_DEM,

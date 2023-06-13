@@ -1,5 +1,5 @@
 ================================================================
-Title                   : Dzip v3.0
+Title                   : Dzip v3.1
 
 Authors                 : Nolan Pflug, Stefan Schwoon, Sphere
 
@@ -138,6 +138,10 @@ Delete files from an exisiting archive: dzip [-e] -d <dzfile> <files>
 ================================================================
 
 Version history:
+
+13.06.23: Version 3.1
+          now removes working directory from paths by default
+          added flag -p to avoid above behavior and force adding full paths
 
 18.04.21: Version 3.0
           added support for PROTOCOL_FITZQUAKE (protocol 666).
