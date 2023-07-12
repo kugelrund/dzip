@@ -8,6 +8,11 @@ if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
         CACHE PATH "Default installation directory." FORCE)
 endif()
 
+add_library(dzip_endian INTERFACE)
+if(CMAKE_C_BYTE_ORDER STREQUAL "BIG_ENDIAN")
+    target_compile_definitions(dzip_endian INTERFACE DZIP_BIG_ENDIAN)
+endif()
+
 add_library(dzip_warnings INTERFACE)
 if(MSVC)
     target_compile_options(dzip_warnings INTERFACE /W4)
@@ -45,5 +50,5 @@ add_executable(dzip
     uncompress.c
     v1code.c
 )
-target_link_libraries(dzip PRIVATE dzip_warnings dzip_zlib)
+target_link_libraries(dzip PRIVATE dzip_endian dzip_warnings dzip_zlib)
 install(TARGETS dzip DESTINATION bin)
