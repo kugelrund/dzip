@@ -256,7 +256,7 @@ void parse_switch (char *arg)
 
 void usage(void)
 {
-    fprintf(stderr,
+	fprintf(stdout,
 	"Dzip v%u.%u: specializing in Quake demo compression\n\n"
 
 	"Compression:         dzip <filenames> [-o <outputfile>]\n"
@@ -277,7 +277,7 @@ void usage(void)
 	MAJOR_VERSION, MINOR_VERSION
     );
 
-    exit(1);
+    exit(0);
 }
 
 void DoFiles (char *fname, void (*func)(char *));
