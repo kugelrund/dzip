@@ -239,7 +239,6 @@ void dzViewFile (char *src, char *file)
 			continue;
 
 		outfile = stderr;
-		fclose(stdout);
 		dzExtractFile(i, 0);
 		fprintf(stderr, "\n");
 		break;
