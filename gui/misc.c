@@ -17,7 +17,7 @@ void ActionsAbort(void)
 const char abouttext[] =
 	"Dzip -- Compression program\n"
 	"Works great on Quake demo files!\n\n"
-	"Version 3.1 -- Released 13.06.2023\n"
+	"Version 3.2 -- Released 24.04.2025\n"
 	"Win32 version by Nolan Pflug\n"
 	"(radix@planetquake.com)\n"
 	"Initial version by Stefan Schwoon\n"

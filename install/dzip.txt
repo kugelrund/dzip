@@ -1,5 +1,5 @@
 ================================================================
-Title                   : Dzip v3.1
+Title                   : Dzip v3.2
 
 Authors                 : Nolan Pflug, Stefan Schwoon, Sphere
 
@@ -138,6 +138,10 @@ Delete files from an exisiting archive: dzip [-e] -d <dzfile> <files>
 ================================================================
 
 Version history:
+
+24.04.25: Version 3.2
+          fixed -s option on Windows
+          use stdout instead of stderr for printing help (thanks tansy)
 
 13.06.23: Version 3.1
           now removes working directory from paths by default

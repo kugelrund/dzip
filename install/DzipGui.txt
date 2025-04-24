@@ -58,6 +58,9 @@ Additional Credits to   : Jean-Loup Gailly and Mark Adler whose Zlib
 
 Version history:
 
+24.04.25: Version 3.2
+          Fixed -s option of command line version on Windows
+
 13.06.23: Version 3.1
           Fixed double clicking files not opening associated programs
           Removed obsolete self-extraction feature and shell extensions
