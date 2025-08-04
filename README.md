@@ -18,19 +18,32 @@ For other systems, please see section Compilation.
 If no system zlib is available, make sure to clone the repository using `--recurse-submodules` to clone the required zlib sources too.
 
 [CMake](https://cmake.org/) may be used to build Dzip.
-For example, on unix systems, you may want to setup the build files using
+For example, from the top-level directory the commands
 
 ```bash
-mkdir build
-cd build
-cmake ..
+cmake -B ./build -S . -DCMAKE_BUILD_TYPE=Release
+cmake --build ./build
+cmake --install ./build --prefix ./install
 ```
 
-followed by running `make` to compile, assuming you are using CMake with Makefiles.
+may be run to get the compiled dzip executable in the install subdirectory.
 
 Note that compilation of the GUI is only supported on Windows with Visual Studio for now.
-A simple way to generate the necessary Visual Studio projects is to use the `cmake-gui` on Windows.
-Make sure to target Win32, other platforms (including x64) are not supported for now.
+Make sure to target Win32, other architectures (including x64) are not supported for now.
+The necessary Visual Studio projects may for example be generated with:
+
+```bash
+cmake -B ./build -S . -G "Visual Studio 17 2022" -A Win32 -DCMAKE_INSTALL_PREFIX="./install"
+```
+
+You can then either open the generated Visual Studio solution and work from there, or for example run
+
+```bash
+cmake --build ./build --config Release
+cmake --install ./build
+```
+
+from the command line.
 
 ## Usage
 

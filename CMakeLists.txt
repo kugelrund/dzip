@@ -1,12 +1,5 @@
-cmake_minimum_required(VERSION 3.1.0)
+cmake_minimum_required(VERSION 3.15)
 project(dzip)
-
-set(CMAKE_C_STANDARD 11)
-set(CMAKE_CXX_STANDARD 11)
-if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
-    set(CMAKE_INSTALL_PREFIX ${CMAKE_CURRENT_LIST_DIR}/install
-        CACHE PATH "Default installation directory." FORCE)
-endif()
 
 add_library(dzip_endian INTERFACE)
 if(CMAKE_C_BYTE_ORDER STREQUAL "BIG_ENDIAN")
